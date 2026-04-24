@@ -16,9 +16,14 @@ class Admin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(Auth::user()->user_type === "user") {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        if (Auth::user()->user_type === "user") {
             return redirect('user-dashboard');
         }
         return $next($request);
     }
 }
+
+
