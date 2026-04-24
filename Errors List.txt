@@ -1,0 +1,87 @@
+-> when edit , add image -> button heading is submit
+
+
+Info Section Add->description error not print
+
+Edit Info Section-> with out description info section is saved
+
+Add Why Us Image-> any error image is remove
+
+Edit Why Us Image->remove description star
+->url is wrong
+
+CallToAction Edit->button heading
+
+Edit Hero Section-> remove star icon 
+
+Feature Image Add-> STAR ICON NAI H , ERROR : DESCRIPTION AND IMAGE
+
+Feature Image Edit -> image is require , subtile pa require icon h
+
+Feature Image Edit-> description is require but data saved
+
+Why Choose Us Add -> description error is not print
+
+Why Choose Us Edit -> description is not required
+
+Add New Gallery->image preview 
+
+Template Files->file not download
+
+Edit Template File->current icon not  showing
+
+Edit Blog Category->serial->min ,max
+
+Edit Blog Category->value in minus
+
+Edit Blog Category->keywords 
+
+Job Cateogory->View [admin.job.job-category.index] not found.
+
+Client Section-> proper link is required in field
+
+List of Teams->order no is negative
+
+Add Service->description error not print
+
+Package Categories List -> The POST method is not supported for route package-category/delete/1. Supported methods: DELETE.
+
+
+Restore Enquiry->Cannot delete or update a parent row
+
+Settings->webp also upload
+
+Trash->only enquiry show
+
+
+
+{users}
+email
+whatsapp num
+user type  (add/edit)
+ these labes are not associated with inputs.
+ new password-->colum size sm uses instead of password privious password are missing 
+in add case img is not showimg but when we add it in edit it shows....
+
+{gallary}
+
+imge...>sm
+all labes are not associated with inputs.
+gallary nad gallery category.....>sm col
+in edit also not associated with inputs.
+update btn..>sm
+
+{tempelate files}
+
+remove the icon added with colum name of template file also sm it
+in temp file colum the img of temp file is not showing in dropdown
+after add the temp no pop up appears
+in edit case after descrpition there's a conflict of colums....
+the privious icon is not appearings
+temp file.....> sm 
+after edit the temp no  pop up appears
+
+{blog.....> category}
+all labes are not associated with inputs.
+all must be sm edit / add
+placeholder
