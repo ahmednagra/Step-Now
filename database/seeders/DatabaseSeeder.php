@@ -11,11 +11,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(SettingsTableSeeder::class);
         $this->call(UserSeeder::class);
-        $this->call(CookiesSeeder::class);
-         $this->call(PrivacyPolicySeeder::class);
-         $this->call(TermsAndConditionSeeder::class);
-         $this->call(SeoGlobalSeeder::class);
-         $this->call(CourseSeeder::class);
+        // $this->call(CookiesSeeder::class);
+        //  $this->call(PrivacyPolicySeeder::class);
+        //  $this->call(TermsAndConditionSeeder::class);
+        //  $this->call(SeoGlobalSeeder::class);
+        //  $this->call(CourseSeeder::class);
 
         // $this->call(PagesTableSeeder::class);
         

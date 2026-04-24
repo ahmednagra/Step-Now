@@ -34,7 +34,7 @@
                     
                     <div class="about-one__btn-box-and-call-box">
                         <div class="about-one__btn-box">
-                            <a href="{{ route('front.about-us') }}" class="about-one__btn thm-btn">Mehr Lesen<span
+                            <a href="{{ route('front.about') }}" class="about-one__btn thm-btn">Mehr Lesen<span
                                     class="fas fa-arrow-right"></span></a>
                         </div>
                         <div class="about-one__call-box">

@@ -64,7 +64,7 @@
                                 <a href="{{ route('front.index') }}">Startseite</a>
                             </li>
                             <li>
-                                <a href="{{ route('front.about-us') }}">Über uns</a>
+                                <a href="{{ route('front.about') }}">Über uns</a>
                             </li>
                             <li>
                                 <a href="{{ route('front.services') }}">Dienstleistungen</a>

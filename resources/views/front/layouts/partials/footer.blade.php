@@ -52,7 +52,7 @@
                         <div class="footer-widget__links">
                             <h4 class="footer-widget__title">Schnellzugriff</h4>
                             <ul class="footer-widget__links-list list-unstyled">
-                                <li><a href="{{ route('front.about-us') }}">Über uns</a></li>
+                                <li><a href="{{ route('front.about') }}">Über uns</a></li>
                                 <li><a href="{{ route('front.services') }}">Unsere Services</a></li>
                                 <li><a href="{{ route('front.contactus') }}">Kontakt</a></li>
                             </ul>
