@@ -6,92 +6,63 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * StepNow Rides & Movers e.K. — Master Seeder
+ *
+ * Source of truth: Gewerbe-Anmeldung (GewA 1) registered at
+ * Bürgermeisteramt Deizisau on 28.10.2025, Handelsregister entry
+ * HRA 742905 at Amtsgericht Stuttgart.
+ *
+ * All seeders are idempotent (updateOrInsert) and table-guarded via
+ * Schema::hasTable(), so missing migrations log a warning instead of
+ * crashing the run.
+ *
+ * Legacy education-platform seeders (StudyProgram, JCategory, Course,
+ * Team, Webinar, Blog, JobApplication, CompanyJob, Cookies,
+ * PrivacyPolicy, TermsAndCondition, SeoGlobal, Testimonial-legacy)
+ * have been removed per business decision — this project is now
+ * exclusively a Personenbeförderung (Mietwagen) + Paketdienst operation.
+ */
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * StepNow Rides & Movers — Master Seeder.
-     *
-     * Each child seeder is guarded with Schema::hasTable() so that if a
-     * migration is missing (e.g. after you clone on a fresh machine and some
-     * migration files haven't been added yet) the whole run does NOT crash.
-     * Instead, the missing table is logged and skipped.
-     *
-     * All child seeders use updateOrInsert, so re-running this is idempotent.
-     */
     public function run(): void
     {
         // seeder class  =>  primary table it writes to
         $plan = [
-            // 1) Core — settings, auth
-            SettingsTableSeeder::class        => 'settings',
-            UserSeeder::class                 => 'users',
+            // 1) Core — business settings, auth
+            SettingsTableSeeder::class         => 'settings',
+            UserSeeder::class                  => 'users',
 
-            // 2) Pages / taxonomy (parents first)
-            PagesTableSeeder::class           => 'page_categories',
-            StudyProgramSeeder::class         => 'study_programs',
-            JCategorySeeder::class            => 'jcategories',
+            // 2) Homepage content
+            SliderSeeder::class                => 'sliders',
+            InfoBlockSeeder::class             => 'info_blocks',
+            WhyChooseUsSectionSeeder::class    => 'why_choose_us_sections',
+            TestimonialSectionSeeder::class    => 'testimonial_sections',
 
-            // 3) Homepage content (StepNow Rides site)
-            SliderSeeder::class               => 'sliders',
-            InfoBlockSeeder::class            => 'info_blocks',
-            WhyChooseUsSectionSeeder::class   => 'why_choose_us_sections',
-            TestimonialSectionSeeder::class   => 'testimonial_sections',
-            TestimonialSeeder::class          => 'testimonials',
-            PartnerSeeder::class              => 'partners',
+            // 3) Pricing — 2 categories (Rides + Parcel)
+            PackageCategorySeeder::class       => 'package_categories',
+            PackageSeeder::class               => 'packages',
 
-            // 4) Packages (pricing page)
-            PackageCategorySeeder::class      => 'package_categories',
-            PackageSeeder::class              => 'packages',
+            // 4) FAQ
+            FaqSeeder::class                   => 'faq_sections',
 
-            // 5) FAQs
-            FaqSeeder::class                  => 'faq_sections',
-
-            // 6) Policies / legal pages
-            PolicySeeder::class               => 'policies',
-
-            // 7) Blogs & webinars
-            BlogSeeder::class                 => 'bcategories',
-            WebinarSeeder::class              => 'webinars',
-
-            // 8) Leads
-            EnquirySeeder::class              => 'enquiries',
-            NewsletterSeeder::class           => 'newsletters',
-
-            // 9) Jobs / careers
-            JobApplicationSeeder::class       => 'job_applications',
-
-            // 10) Legacy education-platform seeders — uncomment if still needed
-            // CourseSeeder::class            => 'courses',
-            // TeamSeeder::class              => 'teams',
-            // CookiesSeeder::class           => 'cookies',
-            // PrivacyPolicySeeder::class     => 'privacy_policies',
-            // TermsAndConditionSeeder::class => 'terms_and_conditions',
-            // SeoGlobalSeeder::class         => 'seo_globals',
+            // 5) Legal pages (DSGVO / TMG compliance)
+            PolicySeeder::class                => 'policies',
         ];
 
         $skipped = [];
 
         foreach ($plan as $seederClass => $table) {
-            if (! Schema::hasTable($table)) {
-                $skipped[] = "{$seederClass}  (missing table: {$table})";
+            if (!Schema::hasTable($table)) {
+                $skipped[] = $seederClass . ' (missing table: ' . $table . ')';
                 continue;
             }
-
-            if (! class_exists($seederClass)) {
-                $skipped[] = "{$seederClass}  (class not found)";
-                continue;
-            }
-
             $this->call($seederClass);
         }
 
-        if (! empty($skipped)) {
-            $this->command->warn('');
-            $this->command->warn('The following seeders were SKIPPED:');
-            foreach ($skipped as $s) {
-                $this->command->warn('  - ' . $s);
-            }
-            $this->command->warn('Run `php artisan migrate` after adding the missing migration files, then re-seed.');
+        if (!empty($skipped)) {
+            Log::warning('DatabaseSeeder skipped: ' . implode(', ', $skipped));
+            $this->command->warn('Skipped: ' . implode(', ', $skipped));
         }
     }
 }

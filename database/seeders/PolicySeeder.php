@@ -5,246 +5,474 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Policy pages — DSGVO / TMG / PBefG-compliant German legal texts.
+ *
+ * IMPORTANT — these are TEMPLATE texts tailored to StepNow Rides & Movers e.K.
+ * They cover the baseline German legal requirements for a Mietwagen +
+ * Paketdienst operation, but YOU are responsible for having a Rechtsanwalt
+ * or Datenschutzbeauftragter review them before going live.
+ *
+ * Placeholders marked with [BITTE ERGÄNZEN] must be filled in once the
+ * corresponding authority data is available:
+ *   - USt-IdNr (once issued by Finanzamt)
+ *   - PBefG-Konzessionsnummer (once issued by Landratsamt Esslingen)
+ *
+ * Legal basis for each page:
+ *   - Impressum  → § 5 TMG + § 18 MStV
+ *   - Datenschutz → Art. 13 DSGVO + § 25 TTDSG
+ *   - AGB        → §§ 305–310 BGB (general T&C framework)
+ *   - Cookies    → § 25 TTDSG + Art. 6(1) DSGVO
+ *   - Widerruf   → § 312g BGB / EU VRRL
+ */
 class PolicySeeder extends Seeder
 {
     public function run(): void
     {
         $policies = [
+            // ==========================================================
+            // 1) IMPRESSUM
+            // ==========================================================
             [
-                'id' => 1,
-                'title' => 'Privacy Policy',
-                'page_title' => 'Privacy Policy',
-                'description' => <<<'EOT'
-<p data-start="140" data-end="158"><strong data-start="140" data-end="158">Privacy Policy</strong></p>
-<ul data-start="160" data-end="1386"><li data-start="160" data-end="325">
-<p data-start="162" data-end="325">We collect personal information such as your name, email address, phone number, course preferences, and any details you submit through enquiry forms or WhatsApp.</p>
-</li><li data-start="326" data-end="493">
-<p data-start="328" data-end="493">Information is used to process your enquiries, guide you with course options, complete your admission process, provide study materials, and offer customer support.</p>
-</li><li data-start="494" data-end="638">
-<p data-start="496" data-end="638">We may use your data to send important updates, reminders, study material links, and promotional offers related to our educational services.</p>
-</li><li data-start="639" data-end="833">
-<p data-start="641" data-end="833">Your personal information is <strong data-start="670" data-end="684">never sold</strong> to third parties. It is only shared with trusted service providers who help us deliver our classes, payment processing, or communication services.</p>
-</li><li data-start="834" data-end="967">
-<p data-start="836" data-end="967">We use cookies and analytics tools to understand website performance, improve user experience, and enhance our marketing efforts.</p>
-</li><li data-start="968" data-end="1094">
-<p data-start="970" data-end="1094">All data is stored securely, and we follow strict measures to protect your information from unauthorized access or misuse.</p>
-</li><li data-start="1095" data-end="1203">
-<p data-start="1097" data-end="1203">You may request access, correction, or deletion of your data at any time by contacting our support team.</p>
-</li><li data-start="1204" data-end="1304">
-<p data-start="1206" data-end="1304">Continued use of this website means you agree to the practices described in this Privacy Policy.</p>
-</li><li data-start="1305" data-end="1386">
-<p data-start="1307" data-end="1386">We may update this policy when needed; any changes will be posted on this page.</p></li></ul>
-EOT,
-                'order_no' => 1,
-                'status' => 'active',
-                'created_at' => '2025-11-14 14:45:08',
-                'updated_at' => '2025-11-15 14:08:47',
+                'id'           => 1,
+                'title'        => 'Impressum',
+                'page_title'   => 'Impressum',
+                'description'  => $this->impressum(),
+                'meta_title'   => 'Impressum – StepNow Rides & Movers e.K.',
+                'meta_keyword' => 'Impressum, StepNow Rides, Naeem Ahmad, Deizisau',
+                'meta_description' => 'Impressum nach § 5 TMG für StepNow Rides & Movers e.K., Mietwagen- und Paketdienstunternehmen in Deizisau, Landkreis Esslingen.',
+                'slug'         => 'impressum',
+                'status'       => 'active',
+                'created_at'   => '2026-04-24 12:00:00',
+                'updated_at'   => now(),
             ],
+
+            // ==========================================================
+            // 2) DATENSCHUTZERKLÄRUNG
+            // ==========================================================
             [
-                'id' => 2,
-                'title' => 'Terms & Conditions',
-                'page_title' => 'Terms & Conditions',
-                'description' => <<<'EOT'
-<p data-start="101" data-end="123"><strong data-start="101" data-end="123">Terms &amp; Conditions</strong></p>
-<ul data-start="125" data-end="1516"><li data-start="125" data-end="262">
-<p data-start="127" data-end="262">By using this website and enrolling in any course, you agree to follow all rules, policies, and guidelines set by BestQualityEdu.com.</p>
-</li><li data-start="263" data-end="380">
-<p data-start="265" data-end="380">All course details, fees, and schedules are subject to change based on university guidelines or internal updates.</p>
-</li><li data-start="381" data-end="489">
-<p data-start="383" data-end="489">Enrollment is confirmed only after completing the required documentation and fee payments as instructed.</p>
-</li><li data-start="490" data-end="628">
-<p data-start="492" data-end="628">Students are responsible for providing accurate information during registration, including name, contact details, and selected course.</p>
-</li><li data-start="629" data-end="771">
-<p data-start="631" data-end="771">Study materials, online classes, and recorded lessons are provided solely for personal use and must not be shared, copied, or distributed.</p>
-</li><li data-start="772" data-end="937">
-<p data-start="774" data-end="937">Certificates and degrees are issued by the respective universities. BestQualityEdu.com acts only as a facilitator for guidance, support, and learning assistance.</p>
-</li><li data-start="938" data-end="1049">
-<p data-start="940" data-end="1049">Refunds, if applicable, follow specific university or institute rules and may vary depending on the course.</p>
-</li><li data-start="1050" data-end="1157">
-<p data-start="1052" data-end="1157">Monthly installment plans must be paid on time; delays may affect access to classes or study materials.</p>
-</li><li data-start="1158" data-end="1281">
-<p data-start="1160" data-end="1281">We are not responsible for delays caused by external authorities, universities, or technical issues beyond our control.</p>
-</li><li data-start="1282" data-end="1398">
-<p data-start="1284" data-end="1398">Misuse of the website, false information, or abusive behaviour may lead to permanent cancellation of enrollment.</p>
-</li><li data-start="1399" data-end="1516">
-<p data-start="1401" data-end="1516">By continuing to use this website, you accept these Terms &amp; Conditions and agree to any updates made in the future.</p></li></ul><p><br></p>
-EOT,
-                'order_no' => 2,
-                'status' => 'active',
-                'created_at' => '2025-11-15 14:09:33',
-                'updated_at' => '2025-11-15 14:09:33',
+                'id'           => 2,
+                'title'        => 'Datenschutzerklärung',
+                'page_title'   => 'Datenschutzerklärung',
+                'description'  => $this->datenschutz(),
+                'meta_title'   => 'Datenschutzerklärung – StepNow Rides & Movers e.K.',
+                'meta_keyword' => 'Datenschutz, DSGVO, StepNow Rides, Deizisau',
+                'meta_description' => 'Informationen zur Verarbeitung personenbezogener Daten nach Art. 13 DSGVO bei StepNow Rides & Movers e.K.',
+                'slug'         => 'datenschutz',
+                'status'       => 'active',
+                'created_at'   => '2026-04-24 12:00:00',
+                'updated_at'   => now(),
             ],
+
+            // ==========================================================
+            // 3) AGB
+            // ==========================================================
             [
-                'id' => 3,
-                'title' => 'Cookie Policy',
-                'page_title' => 'Cookie Policy',
-                'description' => <<<'EOT'
-<p data-start="113" data-end="130"><strong data-start="113" data-end="130">Cookie Policy</strong></p>
-<ul data-start="132" data-end="999"><li data-start="132" data-end="244">
-<p data-start="134" data-end="244"><strong data-start="134" data-end="155">What Are Cookies:</strong> Cookies are small files stored on your device to help improve your website experience.</p>
-</li><li data-start="245" data-end="387">
-<p data-start="247" data-end="387"><strong data-start="247" data-end="270">Purpose of Cookies:</strong> We use cookies to enhance site performance, remember user preferences, analyze traffic, and optimize our services.</p>
-</li><li data-start="388" data-end="597">
-<p data-start="390" data-end="418"><strong data-start="390" data-end="416">Types of Cookies Used:</strong></p>
-<ul data-start="421" data-end="597"><li data-start="421" data-end="468">
-<p data-start="423" data-end="468">Essential cookies for website functionality</p>
-</li><li data-start="471" data-end="528">
-<p data-start="473" data-end="528">Analytics cookies to track usage and improve services</p>
-</li><li data-start="531" data-end="597">
-<p data-start="533" data-end="597">Optional marketing cookies to show relevant content and offers</p>
-</li></ul>
-</li><li data-start="598" data-end="733">
-<p data-start="600" data-end="733"><strong data-start="600" data-end="624">Third-Party Cookies:</strong> Some features may use trusted third-party services (like Google Analytics) that may set their own cookies.</p>
-</li><li data-start="734" data-end="899">
-<p data-start="736" data-end="899"><strong data-start="736" data-end="757">Managing Cookies:</strong> You can choose to disable cookies via your browser settings. Note that some website features may not work properly if cookies are disabled.</p>
-</li><li data-start="900" data-end="999">
-<p data-start="902" data-end="999"><strong data-start="902" data-end="914">Consent:</strong> By using our website, you agree to our use of cookies as described in this policy.</p></li></ul><p><br></p>
-EOT,
-                'order_no' => 3,
-                'status' => 'active',
-                'created_at' => '2025-11-15 14:10:24',
-                'updated_at' => '2025-11-15 14:10:24',
+                'id'           => 3,
+                'title'        => 'Allgemeine Geschäftsbedingungen',
+                'page_title'   => 'AGB',
+                'description'  => $this->agb(),
+                'meta_title'   => 'AGB – StepNow Rides & Movers e.K.',
+                'meta_keyword' => 'AGB, Geschäftsbedingungen, Mietwagen, Paketdienst',
+                'meta_description' => 'Allgemeine Geschäftsbedingungen für Mietwagen- und Paketdienstleistungen der StepNow Rides & Movers e.K.',
+                'slug'         => 'agb',
+                'status'       => 'active',
+                'created_at'   => '2026-04-24 12:00:00',
+                'updated_at'   => now(),
             ],
+
+            // ==========================================================
+            // 4) COOKIE-RICHTLINIE
+            // ==========================================================
             [
-                'id' => 4,
-                'title' => 'GDPR Notice',
-                'page_title' => 'GDPR Notice',
-                'description' => <<<'EOT'
-<p data-start="106" data-end="123"><strong data-start="106" data-end="121">GDPR Notice</strong></p>
-<ul data-start="125" data-end="1472"><li data-start="125" data-end="232">
-<p data-start="127" data-end="232"><strong data-start="127" data-end="147">Data Controller:</strong> Best Quality Education (bestqualityedu.com) is responsible for your personal data.</p>
-</li><li data-start="233" data-end="384">
-<p data-start="235" data-end="384"><strong data-start="235" data-end="254">Data Collected:</strong> We may collect your name, email, phone number, course preferences, uploaded documents, and communication via WhatsApp or forms.</p>
-</li><li data-start="385" data-end="571">
-<p data-start="387" data-end="571"><strong data-start="387" data-end="413">Purpose of Processing:</strong> Your data is used to process enrollments, provide study materials, communicate updates, improve services, and for marketing purposes (if consent is given).</p>
-</li><li data-start="572" data-end="700">
-<p data-start="574" data-end="700"><strong data-start="574" data-end="590">Legal Basis:</strong> We process your data with your consent, for performance of a contract, or to comply with legal obligations.</p>
-</li><li data-start="701" data-end="865">
-<p data-start="703" data-end="865"><strong data-start="703" data-end="720">Data Sharing:</strong> Your personal information is only shared with trusted service providers (universities, payment processors, analytics tools) and is never sold.</p>
-</li><li data-start="866" data-end="995">
-<p data-start="868" data-end="995"><strong data-start="868" data-end="887">Data Retention:</strong> We store your personal data only as long as necessary to provide services and fulfill legal requirements.</p>
-</li><li data-start="996" data-end="1202">
-<p data-start="998" data-end="1027"><strong data-start="998" data-end="1025">Your Rights under GDPR:</strong></p>
-<ul data-start="1030" data-end="1202"><li data-start="1030" data-end="1059">
-<p data-start="1032" data-end="1059">Access your personal data</p>
-</li><li data-start="1062" data-end="1109">
-<p data-start="1064" data-end="1109">Request correction or deletion of your data</p>
-</li><li data-start="1112" data-end="1144">
-<p data-start="1114" data-end="1144">Withdraw consent at any time</p>
-</li><li data-start="1147" data-end="1171">
-<p data-start="1149" data-end="1171">Object to processing</p>
-</li><li data-start="1174" data-end="1202">
-<p data-start="1176" data-end="1202">Request data portability</p>
-</li></ul>
-</li><li data-start="1203" data-end="1334">
-<p data-start="1205" data-end="1334"><strong data-start="1205" data-end="1227">How to Contact Us:</strong> For any GDPR-related requests, contact:<br data-start="1267" data-end="1270">
-<strong data-start="1272" data-end="1282">Email:</strong> <a data-start="1283" data-end="1306" class="decorated-link cursor-pointer" rel="noopener">info@bestqualityedu.com<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"></svg></span></a></p></li></ul>
-EOT,
-                'order_no' => 4,
-                'status' => 'active',
-                'created_at' => '2025-11-15 14:11:33',
-                'updated_at' => '2025-11-15 14:11:33',
+                'id'           => 4,
+                'title'        => 'Cookie-Richtlinie',
+                'page_title'   => 'Cookie-Richtlinie',
+                'description'  => $this->cookies(),
+                'meta_title'   => 'Cookie-Richtlinie – StepNow Rides & Movers e.K.',
+                'meta_keyword' => 'Cookies, TTDSG, Tracking',
+                'meta_description' => 'Informationen über die Verwendung von Cookies auf step-now.de nach § 25 TTDSG.',
+                'slug'         => 'cookies',
+                'status'       => 'active',
+                'created_at'   => '2026-04-24 12:00:00',
+                'updated_at'   => now(),
             ],
+
+            // ==========================================================
+            // 5) WIDERRUFSBELEHRUNG
+            // ==========================================================
             [
-                'id' => 5,
-                'title' => 'Anti-Money Laundering (AML) Policy',
-                'page_title' => 'Anti-Money Laundering (AML) Policy',
-                'description' => <<<'EOT'
-<p data-start="173" data-end="213"><strong data-start="173" data-end="211">Anti-Money Laundering (AML) Policy</strong></p>
-<ul data-start="215" data-end="1418"><li data-start="215" data-end="392">
-<p data-start="217" data-end="392"><strong data-start="217" data-end="229">Purpose:</strong> Best Quality Education is committed to preventing any form of money laundering or terrorist financing in compliance with UAE laws and international regulations.</p>
-</li><li data-start="393" data-end="527">
-<p data-start="395" data-end="527"><strong data-start="395" data-end="405">Scope:</strong> This policy applies to all students, staff, and third-party partners who make or receive payments through our platform.</p>
-</li><li data-start="528" data-end="714">
-<p data-start="530" data-end="714"><strong data-start="530" data-end="556">Customer Verification:</strong> We may require verification of identity (KYC) for all students enrolling in courses, including government-issued ID, contact details, and proof of payment.</p>
-</li><li data-start="715" data-end="871">
-<p data-start="717" data-end="871"><strong data-start="717" data-end="740">Payment Monitoring:</strong> All transactions are monitored for suspicious activity, unusual payment patterns, or transactions involving high-risk countries.</p>
-</li><li data-start="872" data-end="1012">
-<p data-start="874" data-end="1012"><strong data-start="874" data-end="908">Reporting Suspicious Activity:</strong> Any suspicious activity will be reported to the relevant authorities in accordance with UAE AML laws.</p>
-</li><li data-start="1013" data-end="1139">
-<p data-start="1015" data-end="1139"><strong data-start="1015" data-end="1043">Prohibited Transactions:</strong> Cash or third-party payments intended to conceal the origin of funds are strictly prohibited.</p>
-</li><li data-start="1140" data-end="1277">
-<p data-start="1142" data-end="1277"><strong data-start="1142" data-end="1167">Staff Responsibility:</strong> All employees and agents must follow this AML Policy and report any concerns immediately to the management.</p>
-</li><li data-start="1278" data-end="1418">
-<p data-start="1280" data-end="1418"><strong data-start="1280" data-end="1304">Compliance &amp; Review:</strong> This policy is regularly reviewed and updated to ensure compliance with applicable AML laws and best practices.</p>
-</li></ul>
-<p data-start="1420" data-end="1513"><strong data-start="1420" data-end="1432">Contact:</strong><br data-start="1432" data-end="1435">
-For any questions regarding this policy, contact <strong data-start="1484" data-end="1511"><a data-start="1486" data-end="1509" class="decorated-link cursor-pointer" rel="noopener">info@bestqualityedu.com<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"></svg></span></a></strong></p><p><br></p>
-EOT,
-                'order_no' => 5,
-                'status' => 'active',
-                'created_at' => '2025-11-15 14:13:02',
-                'updated_at' => '2025-11-15 14:13:02',
-            ],
-            [
-                'id' => 6,
-                'title' => 'Legal Compliance Policy',
-                'page_title' => 'Legal Compliance Policy',
-                'description' => <<<'EOT'
-<p data-start="124" data-end="153"><strong data-start="124" data-end="151">Legal Compliance Policy</strong></p>
-<ul data-start="155" data-end="1311"><li data-start="155" data-end="318">
-<p data-start="157" data-end="318"><strong data-start="157" data-end="169">Purpose:</strong> Best Quality Education is committed to adhering to all applicable laws, regulations, and industry standards to ensure ethical and legal operation.</p>
-</li><li data-start="319" data-end="426">
-<p data-start="321" data-end="426"><strong data-start="321" data-end="331">Scope:</strong> This policy applies to all employees, students, partners, and third-party service providers.</p>
-</li><li data-start="427" data-end="582">
-<p data-start="429" data-end="582"><strong data-start="429" data-end="459">Education &amp; Accreditation:</strong> We comply with all university and accreditation requirements, including UGC, AICTE, NAAC, DEB, AIU, and IAU regulations.</p>
-</li><li data-start="583" data-end="758">
-<p data-start="585" data-end="758"><strong data-start="585" data-end="615">Data Protection &amp; Privacy:</strong> We follow local and international data protection laws, including GDPR and UAE data privacy requirements, to safeguard personal information.</p>
-</li><li data-start="759" data-end="888">
-<p data-start="761" data-end="888"><strong data-start="761" data-end="786">Financial Compliance:</strong> All payments, transactions, and refunds follow applicable financial and anti-money laundering laws.</p>
-</li><li data-start="889" data-end="1020">
-<p data-start="891" data-end="1020"><strong data-start="891" data-end="917">Intellectual Property:</strong> All content, study materials, and digital resources respect copyright laws and licensing agreements.</p>
-</li><li data-start="1021" data-end="1173">
-<p data-start="1023" data-end="1173"><strong data-start="1023" data-end="1048">Reporting Violations:</strong> Any employee or stakeholder who becomes aware of a legal or regulatory violation must report it immediately to management.</p>
-</li><li data-start="1174" data-end="1311">
-<p data-start="1176" data-end="1311"><strong data-start="1176" data-end="1198">Continuous Review:</strong> This policy is reviewed regularly to ensure ongoing compliance with new laws, regulations, and best practices.</p>
-</li></ul>
-<p data-start="1313" data-end="1419"><strong data-start="1313" data-end="1325">Contact:</strong><br data-start="1325" data-end="1328">
-For questions about this policy or compliance matters, email: <strong data-start="1390" data-end="1417"><a data-start="1392" data-end="1415" class="decorated-link cursor-pointer" rel="noopener">info@bestqualityedu.com<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"></svg></span></a></strong></p><p><br></p>
-EOT,
-                'order_no' => 6,
-                'status' => 'active',
-                'created_at' => '2025-11-15 14:14:01',
-                'updated_at' => '2025-11-15 14:14:01',
-            ],
-            [
-                'id' => 7,
-                'title' => 'Corporate Social Responsibility (CSR) Policy',
-                'page_title' => 'Corporate Social Responsibility (CSR) Policy',
-                'description' => <<<'EOT'
-<p data-start="157" data-end="207"><strong data-start="157" data-end="205">Corporate Social Responsibility (CSR) Policy</strong></p>
-<ul data-start="209" data-end="1223"><li data-start="209" data-end="370">
-<p data-start="211" data-end="370"><strong data-start="211" data-end="223">Purpose:</strong> Best Quality Education is committed to contributing positively to society by supporting education, skill development, and community empowerment.</p>
-</li><li data-start="371" data-end="725">
-<p data-start="373" data-end="391"><strong data-start="373" data-end="389">Focus Areas:</strong></p>
-<ul data-start="394" data-end="725"><li data-start="394" data-end="499">
-<p data-start="396" data-end="499"><strong data-start="396" data-end="417">Education Access:</strong> Promote online learning for working professionals and underprivileged learners.</p>
-</li><li data-start="502" data-end="609">
-<p data-start="504" data-end="609"><strong data-start="504" data-end="526">Skill Development:</strong> Provide resources and programs to enhance employability and professional growth.</p>
-</li><li data-start="612" data-end="725">
-<p data-start="614" data-end="725"><strong data-start="614" data-end="636">Community Support:</strong> Engage in initiatives that create social impact and awareness about lifelong learning.</p>
-</li></ul>
-</li><li data-start="726" data-end="880">
-<p data-start="728" data-end="880"><strong data-start="728" data-end="754">Sustainable Practices:</strong> Operate in a responsible and ethical manner, ensuring environmental, social, and economic sustainability in all activities.</p>
-</li><li data-start="881" data-end="993">
-<p data-start="883" data-end="993"><strong data-start="883" data-end="901">Collaboration:</strong> Partner with universities, NGOs, and educational institutions to expand reach and impact.</p>
-</li><li data-start="994" data-end="1115">
-<p data-start="996" data-end="1115"><strong data-start="996" data-end="1023">Monitoring &amp; Reporting:</strong> Regularly assess the outcomes of CSR initiatives and report achievements to stakeholders.</p>
-</li><li data-start="1116" data-end="1223">
-<p data-start="1118" data-end="1223"><strong data-start="1118" data-end="1143">Employee Involvement:</strong> Encourage staff participation in social initiatives and educational programs.</p>
-</li></ul>
-<p data-start="1225" data-end="1320"><strong data-start="1225" data-end="1237">Contact:</strong><br data-start="1237" data-end="1240">
-For CSR-related inquiries or collaboration, email: <strong data-start="1291" data-end="1318"><a data-start="1293" data-end="1316" class="decorated-link cursor-pointer" rel="noopener">info@bestqualityedu.com<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"></svg></span></a></strong></p><p><br></p>
-EOT,
-                'order_no' => 7,
-                'status' => 'active',
-                'created_at' => '2025-11-15 14:14:50',
-                'updated_at' => '2025-11-15 14:14:50',
+                'id'           => 5,
+                'title'        => 'Widerrufsbelehrung',
+                'page_title'   => 'Widerrufsbelehrung',
+                'description'  => $this->widerruf(),
+                'meta_title'   => 'Widerrufsbelehrung – StepNow Rides & Movers e.K.',
+                'meta_keyword' => 'Widerruf, Verbraucherrechte, Stornierung',
+                'meta_description' => 'Widerrufsbelehrung für Verbraucher nach § 312g BGB für Buchungen bei StepNow Rides & Movers e.K.',
+                'slug'         => 'widerruf',
+                'status'       => 'active',
+                'created_at'   => '2026-04-24 12:00:00',
+                'updated_at'   => now(),
             ],
         ];
 
         foreach ($policies as $row) {
             DB::table('policies')->updateOrInsert(['id' => $row['id']], $row);
         }
+    }
+
+    /* ==========================================================
+     *  LEGAL TEXT BODIES
+     * ==========================================================*/
+
+    private function impressum(): string
+    {
+        return <<<'HTML'
+<h2>Angaben gemäß § 5 TMG</h2>
+
+<p>
+<strong>StepNow Rides &amp; Movers e.K.</strong><br>
+Inhaber: Naeem Ahmad<br>
+Blumenstraße 8<br>
+73779 Deizisau<br>
+Deutschland
+</p>
+
+<h3>Kontakt</h3>
+<p>
+Telefon: +49 159 01228856<br>
+E-Mail: info@step-now.de<br>
+Internet: https://step-now.de
+</p>
+
+<h3>Handelsregister</h3>
+<p>
+Registergericht: Amtsgericht Stuttgart<br>
+Registernummer: HRA 742905
+</p>
+
+<h3>Umsatzsteuer-Identifikationsnummer</h3>
+<p>
+Umsatzsteuer-ID nach § 27 a Umsatzsteuergesetz:<br>
+<em>[BITTE ERGÄNZEN – wird nach Erteilung durch das Finanzamt nachgereicht]</em>
+</p>
+
+<h3>Aufsichtsbehörde / Konzession</h3>
+<p>
+Konzession für den Mietwagenverkehr nach § 2 Abs. 1 Nr. 4 PBefG:<br>
+<em>[BITTE ERGÄNZEN – Antrag beim Landratsamt Esslingen in Bearbeitung]</em>
+</p>
+
+<p>
+Zuständige Aufsichts- und Genehmigungsbehörde:<br>
+Landratsamt Esslingen<br>
+Pulverwiesen 11<br>
+73726 Esslingen am Neckar<br>
+Deutschland
+</p>
+
+<h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
+<p>
+Naeem Ahmad<br>
+Anschrift wie oben
+</p>
+
+<h3>EU-Streitschlichtung</h3>
+<p>
+Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+<a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">https://ec.europa.eu/consumers/odr/</a><br>
+Unsere E-Mail-Adresse finden Sie oben im Impressum.
+</p>
+
+<h3>Verbraucherstreitbeilegung / Universalschlichtungsstelle</h3>
+<p>
+Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+</p>
+
+<h3>Haftung für Inhalte</h3>
+<p>
+Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.
+Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen
+zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+</p>
+
+<h3>Haftung für Links</h3>
+<p>
+Unser Angebot enthält ggf. Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir
+für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter
+oder Betreiber der Seiten verantwortlich.
+</p>
+
+<h3>Urheberrecht</h3>
+<p>
+Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die
+Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der
+schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+</p>
+HTML;
+    }
+
+    private function datenschutz(): string
+    {
+        return <<<'HTML'
+<h2>Datenschutzerklärung</h2>
+
+<p>
+Wir freuen uns über Ihr Interesse an unserem Unternehmen. Datenschutz hat einen besonders hohen Stellenwert für die
+Geschäftsleitung der StepNow Rides &amp; Movers e.K. Eine Nutzung unserer Internetseiten ist grundsätzlich ohne Angabe
+personenbezogener Daten möglich. Sofern Sie jedoch besondere Services unseres Unternehmens in Anspruch nehmen möchten,
+könnte eine Verarbeitung personenbezogener Daten erforderlich werden. Diese erfolgt stets im Einklang mit der
+Datenschutz-Grundverordnung (DSGVO) und dem Bundesdatenschutzgesetz (BDSG).
+</p>
+
+<h3>1. Verantwortlicher für die Datenverarbeitung</h3>
+<p>
+<strong>StepNow Rides &amp; Movers e.K.</strong><br>
+Inhaber: Naeem Ahmad<br>
+Blumenstraße 8, 73779 Deizisau<br>
+Telefon: +49 159 01228856<br>
+E-Mail: info@step-now.de
+</p>
+
+<h3>2. Welche Daten erheben wir?</h3>
+<p>Bei Buchung einer Fahrt oder eines Paketdienstes verarbeiten wir die folgenden Kategorien personenbezogener Daten:</p>
+<ul>
+  <li>Kontaktdaten: Name, Telefonnummer, E-Mail-Adresse</li>
+  <li>Fahrtdaten: Abhol- und Zieladresse, Datum, Uhrzeit, Anzahl der Fahrgäste, ggf. Flug-/Zugnummer</li>
+  <li>Paketdaten: Gewicht, Abmessungen, Inhalt (allgemein), Empfängerkontakt</li>
+  <li>Zahlungsdaten (nur soweit zur Abwicklung erforderlich)</li>
+  <li>Technische Daten beim Besuch der Website: IP-Adresse, Browser, Referrer-URL, Zugriffszeitpunkt</li>
+</ul>
+
+<h3>3. Zwecke und Rechtsgrundlage der Verarbeitung</h3>
+<ul>
+  <li><strong>Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO):</strong> Durchführung der Beförderungs- oder Lieferleistung.</li>
+  <li><strong>Rechtliche Verpflichtungen (Art. 6 Abs. 1 lit. c DSGVO):</strong> Aufbewahrung von Rechnungen gemäß § 147 AO (10 Jahre).</li>
+  <li><strong>Berechtigte Interessen (Art. 6 Abs. 1 lit. f DSGVO):</strong> Sichere Bereitstellung der Website, Betrugsprävention.</li>
+  <li><strong>Einwilligung (Art. 6 Abs. 1 lit. a DSGVO):</strong> Newsletter, nicht essenzielle Cookies.</li>
+</ul>
+
+<h3>4. Empfänger der Daten</h3>
+<p>
+Ihre Daten werden ausschließlich an Personen oder Stellen weitergegeben, die zur Durchführung der Leistung erforderlich sind
+(insb. der ausführende Fahrer). Eine Übermittlung in Drittländer außerhalb der EU findet nicht statt.
+</p>
+
+<h3>5. Speicherdauer</h3>
+<p>
+Wir speichern personenbezogene Daten nur so lange, wie dies für die Erfüllung des Zwecks erforderlich ist bzw. gesetzliche
+Aufbewahrungsfristen dies vorschreiben (insb. 10 Jahre für steuerlich relevante Unterlagen nach § 147 AO).
+</p>
+
+<h3>6. Ihre Rechte als betroffene Person</h3>
+<p>Sie haben jederzeit folgende Rechte:</p>
+<ul>
+  <li>Auskunft über Ihre gespeicherten Daten (Art. 15 DSGVO)</li>
+  <li>Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
+  <li>Löschung (Art. 17 DSGVO)</li>
+  <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+  <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
+  <li>Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)</li>
+  <li>Widerruf erteilter Einwilligungen (Art. 7 Abs. 3 DSGVO)</li>
+</ul>
+
+<h3>7. Beschwerderecht bei der Aufsichtsbehörde</h3>
+<p>
+Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig ist für uns:<br>
+<strong>Der Landesbeauftragte für den Datenschutz und die Informationsfreiheit Baden-Württemberg</strong><br>
+Lautenschlagerstraße 20, 70173 Stuttgart<br>
+Telefon: +49 711 615541-0 · E-Mail: poststelle@lfdi.bwl.de
+</p>
+
+<h3>8. Kontaktaufnahme</h3>
+<p>
+Für alle Anfragen zum Datenschutz erreichen Sie uns unter: <strong>info@step-now.de</strong>.
+</p>
+HTML;
+    }
+
+    private function agb(): string
+    {
+        return <<<'HTML'
+<h2>Allgemeine Geschäftsbedingungen (AGB)</h2>
+
+<h3>§ 1 Geltungsbereich</h3>
+<p>
+Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge über die Durchführung von Personenbeförderungs-
+und Paketdienstleistungen zwischen der StepNow Rides &amp; Movers e.K. (nachfolgend "Anbieter") und ihren
+Kunden (nachfolgend "Kunde").
+</p>
+
+<h3>§ 2 Vertragsgegenstand</h3>
+<p>
+Der Anbieter erbringt Beförderungsleistungen im Mietwagenverkehr nach § 49 PBefG sowie Paketzustellungen
+innerhalb Deutschlands. Eine verbindliche Buchung kommt mit der Bestätigung durch den Anbieter zustande.
+</p>
+
+<h3>§ 3 Buchung und Vertragsschluss</h3>
+<p>
+Buchungen können telefonisch, per E-Mail oder über die Website step-now.de erfolgen. Der Anbieter bestätigt
+jede Buchung schriftlich (per E-Mail oder Messenger). Ohne Bestätigung kommt kein Vertrag zustande.
+</p>
+
+<h3>§ 4 Preise und Zahlung</h3>
+<p>
+Es gelten die zum Zeitpunkt der Buchung kommunizierten Festpreise inklusive der gesetzlichen Umsatzsteuer.
+Zahlungen können in bar beim Fahrer, per Überweisung oder per in der Buchung angebotenem elektronischem
+Zahlungsmittel geleistet werden.
+</p>
+
+<h3>§ 5 Stornierung durch den Kunden</h3>
+<p>
+Stornierungen sind bis 24 Stunden vor dem vereinbarten Abholzeitpunkt kostenfrei. Bei späterer Stornierung
+berechnet der Anbieter eine Ausfallgebühr in Höhe von 50 % des Fahrpreises; bei Stornierung weniger als
+2 Stunden vor Abholung 100 %.
+</p>
+
+<h3>§ 6 Pflichten des Kunden</h3>
+<p>
+Der Kunde ist verpflichtet, am vereinbarten Abholort rechtzeitig bereitzustehen. Bei Paketsendungen muss
+der Kunde den Inhalt wahrheitsgemäß deklarieren. Gefahrgut, verbotene oder verderbliche Waren sind vom
+Transport ausgeschlossen.
+</p>
+
+<h3>§ 7 Haftung</h3>
+<p>
+Der Anbieter haftet unbeschränkt für Vorsatz und grobe Fahrlässigkeit sowie nach dem Produkthaftungsgesetz.
+Bei leichter Fahrlässigkeit haftet der Anbieter nur bei Verletzung einer wesentlichen Vertragspflicht und
+begrenzt auf den vertragstypisch vorhersehbaren Schaden. Für Pakettransporte gelten ergänzend §§ 407 ff. HGB.
+</p>
+
+<h3>§ 8 Datenschutz</h3>
+<p>
+Der Anbieter verarbeitet personenbezogene Daten des Kunden ausschließlich im Rahmen der gesetzlichen
+Bestimmungen. Details finden sich in der <a href="/policy/datenschutz">Datenschutzerklärung</a>.
+</p>
+
+<h3>§ 9 Anwendbares Recht und Gerichtsstand</h3>
+<p>
+Es gilt das Recht der Bundesrepublik Deutschland. Ausschließlicher Gerichtsstand für alle Streitigkeiten
+aus diesem Vertragsverhältnis mit Kaufleuten ist, soweit gesetzlich zulässig, Esslingen am Neckar.
+</p>
+
+<h3>§ 10 Salvatorische Klausel</h3>
+<p>
+Sollten einzelne Bestimmungen dieser AGB unwirksam sein, berührt dies die Wirksamkeit der übrigen
+Bestimmungen nicht.
+</p>
+
+<p><em>Stand: April 2026</em></p>
+HTML;
+    }
+
+    private function cookies(): string
+    {
+        return <<<'HTML'
+<h2>Cookie-Richtlinie</h2>
+
+<p>
+Diese Website verwendet Cookies und vergleichbare Technologien. Die Nutzung nicht technisch notwendiger
+Cookies erfolgt gemäß § 25 Abs. 1 TTDSG und Art. 6 Abs. 1 lit. a DSGVO nur mit Ihrer Einwilligung.
+</p>
+
+<h3>1. Was sind Cookies?</h3>
+<p>
+Cookies sind kleine Textdateien, die beim Besuch einer Website auf Ihrem Gerät gespeichert werden. Sie
+ermöglichen es, Ihren Browser bei einem erneuten Besuch wiederzuerkennen.
+</p>
+
+<h3>2. Welche Cookies verwenden wir?</h3>
+<ul>
+  <li>
+    <strong>Technisch notwendige Cookies</strong> (Rechtsgrundlage: § 25 Abs. 2 Nr. 2 TTDSG):
+    erforderlich für den Betrieb der Website (z. B. Session-Cookie, CSRF-Schutz, Cookie-Einwilligung).
+  </li>
+  <li>
+    <strong>Funktionale Cookies</strong> (Rechtsgrundlage: Einwilligung):
+    Sprache und Voreinstellungen des Nutzers.
+  </li>
+  <li>
+    <strong>Analyse-/Marketing-Cookies</strong> (Rechtsgrundlage: Einwilligung):
+    derzeit nicht im Einsatz; sollten diese aktiviert werden, wird hier eine detaillierte Liste ergänzt.
+  </li>
+</ul>
+
+<h3>3. Einwilligung verwalten</h3>
+<p>
+Sie können Ihre Cookie-Einstellungen jederzeit anpassen oder widerrufen, indem Sie den Cookie-Banner neu
+öffnen oder Cookies direkt in Ihrem Browser löschen. Ein Widerruf der Einwilligung berührt die
+Rechtmäßigkeit der bis dahin erfolgten Verarbeitung nicht.
+</p>
+
+<h3>4. Speicherdauer</h3>
+<p>
+Session-Cookies werden mit Beendigung Ihrer Browsersitzung automatisch gelöscht. Persistente Cookies
+haben eine Lebensdauer von maximal 12 Monaten, sofern nichts anderes angegeben ist.
+</p>
+HTML;
+    }
+
+    private function widerruf(): string
+    {
+        return <<<'HTML'
+<h2>Widerrufsbelehrung für Verbraucher</h2>
+
+<p>
+Verbrauchern steht nach § 312g BGB ein Widerrufsrecht bei außerhalb von Geschäftsräumen geschlossenen Verträgen
+und bei Fernabsatzverträgen grundsätzlich zu.
+</p>
+
+<h3>Ausnahme für Personenbeförderung</h3>
+<p>
+<strong>Hinweis:</strong> Nach § 312 Abs. 2 Nr. 5 BGB besteht <strong>kein Widerrufsrecht</strong> bei Verträgen zur
+Erbringung von Dienstleistungen im Zusammenhang mit <strong>Personenbeförderung</strong> zu einem bestimmten Termin
+oder in einem bestimmten Zeitraum. Für Mietwagenfahrten mit festem Termin gilt daher ausschließlich unsere
+Stornoregelung nach § 5 der <a href="/policy/agb">AGB</a>.
+</p>
+
+<h3>Widerrufsrecht für Paketdienstleistungen</h3>
+<p>
+Für Paketdienstleistungen, die nicht zu einem bestimmten Termin erbracht werden müssen, gilt das gesetzliche
+Widerrufsrecht. Sie haben das Recht, binnen 14 Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen.
+</p>
+
+<h4>Folgen des Widerrufs</h4>
+<p>
+Wenn Sie diesen Vertrag widerrufen, haben wir Ihnen alle Zahlungen, die wir von Ihnen erhalten haben, unverzüglich
+und spätestens binnen 14 Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über Ihren Widerruf dieses
+Vertrages bei uns eingegangen ist. Haben Sie verlangt, dass die Dienstleistung während der Widerrufsfrist beginnen
+soll, schulden Sie uns einen angemessenen Betrag für die bis zum Widerruf bereits erbrachte Leistung.
+</p>
+
+<h3>Widerruf per E-Mail</h3>
+<p>
+Um Ihr Widerrufsrecht auszuüben, genügt eine eindeutige Erklärung per E-Mail an
+<a href="mailto:info@step-now.de">info@step-now.de</a> oder per Brief an die im Impressum genannte Adresse.
+</p>
+
+<h3>Muster-Widerrufsformular</h3>
+<p>
+Sie können das folgende Muster-Formular verwenden (nicht verpflichtend):
+</p>
+<pre style="white-space: pre-wrap; font-family: monospace; background: #f7f7f7; padding: 1em; border-radius: 4px;">
+An: StepNow Rides &amp; Movers e.K., Blumenstraße 8, 73779 Deizisau
+E-Mail: info@step-now.de
+
+Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag
+über die Erbringung der folgenden Dienstleistung:
+
+________________________________________________________________
+Bestellt am / erhalten am:
+________________________________________________________________
+Name des/der Verbraucher(s):
+________________________________________________________________
+Anschrift des/der Verbraucher(s):
+________________________________________________________________
+Datum, Unterschrift (nur bei Mitteilung auf Papier)
+________________________________________________________________
+
+(*) Unzutreffendes streichen.
+</pre>
+HTML;
     }
 }
