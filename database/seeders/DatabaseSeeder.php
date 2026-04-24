@@ -3,70 +3,95 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * StepNow Rides & Movers — Master Seeder.
+     *
+     * Each child seeder is guarded with Schema::hasTable() so that if a
+     * migration is missing (e.g. after you clone on a fresh machine and some
+     * migration files haven't been added yet) the whole run does NOT crash.
+     * Instead, the missing table is logged and skipped.
+     *
+     * All child seeders use updateOrInsert, so re-running this is idempotent.
+     */
     public function run(): void
     {
-        /*
-        |----------------------------------------------------------------------
-        | StepNow Rides & Movers — Master Seeder
-        |----------------------------------------------------------------------
-        | Order matters: parents first (categories, sections), children later
-        | (packages, details, features). All seeders use updateOrInsert, so
-        | re-running this is safe and idempotent.
-        */
+        // seeder class  =>  primary table it writes to
+        $plan = [
+            // 1) Core — settings, auth
+            SettingsTableSeeder::class        => 'settings',
+            UserSeeder::class                 => 'users',
 
-        // 1) Core — settings, auth, top-level
-        $this->call(SettingsTableSeeder::class);
-        $this->call(UserSeeder::class);
+            // 2) Pages / taxonomy (parents first)
+            PagesTableSeeder::class           => 'page_categories',
+            StudyProgramSeeder::class         => 'study_programs',
+            JCategorySeeder::class            => 'jcategories',
 
-        // 2) Pages / taxonomy
-        $this->call(PagesTableSeeder::class);           // page_categories + pages
-        $this->call(StudyProgramSeeder::class);         // study_programs
-        $this->call(JCategorySeeder::class);            // jcategories
+            // 3) Homepage content (StepNow Rides site)
+            SliderSeeder::class               => 'sliders',
+            InfoBlockSeeder::class            => 'info_blocks',
+            WhyChooseUsSectionSeeder::class   => 'why_choose_us_sections',
+            TestimonialSectionSeeder::class   => 'testimonial_sections',
+            TestimonialSeeder::class          => 'testimonials',
+            PartnerSeeder::class              => 'partners',
 
-        // 3) Homepage content (StepNow Rides site)
-        $this->call(SliderSeeder::class);               // hero sliders
-        $this->call(InfoBlockSeeder::class);            // "Über uns" block + features
-        $this->call(WhyChooseUsSectionSeeder::class);   // why choose us + details
-        $this->call(TestimonialSectionSeeder::class);   // German rides testimonials
-        $this->call(TestimonialSeeder::class);          // legacy edu testimonials
-        $this->call(PartnerSeeder::class);              // partner logos
+            // 4) Packages (pricing page)
+            PackageCategorySeeder::class      => 'package_categories',
+            PackageSeeder::class              => 'packages',
 
-        // 4) Packages (pricing page)
-        $this->call(PackageCategorySeeder::class);
-        $this->call(PackageSeeder::class);
+            // 5) FAQs
+            FaqSeeder::class                  => 'faq_sections',
 
-        // 5) FAQs
-        $this->call(FaqSeeder::class);                  // faq_sections + faq_details
+            // 6) Policies / legal pages
+            PolicySeeder::class               => 'policies',
 
-        // 6) Policies / legal pages
-        $this->call(PolicySeeder::class);               // privacy, T&C, cookie, GDPR, AML, legal, CSR
-        // Optional legacy single-row seeders (kept for backwards compatibility):
-        // $this->call(CookiesSeeder::class);
-        // $this->call(PrivacyPolicySeeder::class);
-        // $this->call(TermsAndConditionSeeder::class);
-        // $this->call(SeoGlobalSeeder::class);
+            // 7) Blogs & webinars
+            BlogSeeder::class                 => 'bcategories',
+            WebinarSeeder::class              => 'webinars',
 
-        // 7) Content (blogs, webinars)
-        $this->call(BlogSeeder::class);                 // bcategories + blogs
-        $this->call(WebinarSeeder::class);              // deduplicated webinar
+            // 8) Leads
+            EnquirySeeder::class              => 'enquiries',
+            NewsletterSeeder::class           => 'newsletters',
 
-        // 8) Leads captured through the site
-        $this->call(EnquirySeeder::class);              // enquiries + enquiry_comments
-        $this->call(NewsletterSeeder::class);
+            // 9) Jobs / careers
+            JobApplicationSeeder::class       => 'job_applications',
 
-        // 9) Jobs / careers section
-        $this->call(JobApplicationSeeder::class);
+            // 10) Legacy education-platform seeders — uncomment if still needed
+            // CourseSeeder::class            => 'courses',
+            // TeamSeeder::class              => 'teams',
+            // CookiesSeeder::class           => 'cookies',
+            // PrivacyPolicySeeder::class     => 'privacy_policies',
+            // TermsAndConditionSeeder::class => 'terms_and_conditions',
+            // SeoGlobalSeeder::class         => 'seo_globals',
+        ];
 
-        // 10) Legacy education-platform data (comment out when finalising rides-only site)
-        // $this->call(CourseSeeder::class);
-        // $this->call(TeamSeeder::class);
-        // $this->call(JobCountrySeeder::class);
-        // $this->call(JobCitySeeder::class);
-        // $this->call(JobTypeSeeder::class);
-        // $this->call(JobExperienceSeeder::class);
-        // $this->call(FacilityManagmentSeeder::class);
+        $skipped = [];
+
+        foreach ($plan as $seederClass => $table) {
+            if (! Schema::hasTable($table)) {
+                $skipped[] = "{$seederClass}  (missing table: {$table})";
+                continue;
+            }
+
+            if (! class_exists($seederClass)) {
+                $skipped[] = "{$seederClass}  (class not found)";
+                continue;
+            }
+
+            $this->call($seederClass);
+        }
+
+        if (! empty($skipped)) {
+            $this->command->warn('');
+            $this->command->warn('The following seeders were SKIPPED:');
+            foreach ($skipped as $s) {
+                $this->command->warn('  - ' . $s);
+            }
+            $this->command->warn('Run `php artisan migrate` after adding the missing migration files, then re-seed.');
+        }
     }
 }
