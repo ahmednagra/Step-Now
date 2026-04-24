@@ -81,7 +81,7 @@ class FrontController extends Controller
 
     public function rentNow($id)
     {
-        $package = Package::find($id)->where('status', 'active')->where('publish', 'published')->firstOrFail();
+        $package = Package::where('id', $id)->where('status', 'active')->where('publish', 'published')->firstOrFail();
         return view('front.pages.rent-now', compact('package'));
     }
 
