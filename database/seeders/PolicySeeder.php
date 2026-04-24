@@ -8,20 +8,23 @@ use Illuminate\Support\Facades\DB;
 /**
  * Policy pages — DSGVO / TMG / PBefG-compliant German legal texts.
  *
- * IMPORTANT — these are TEMPLATE texts tailored to StepNow Rides & Movers e.K.
- * They cover the baseline German legal requirements for a Mietwagen +
- * Paketdienst operation, but YOU are responsible for having a Rechtsanwalt
- * or Datenschutzbeauftragter review them before going live.
+ * Schema matches migration 2025_11_12_000009_create_policies_table:
+ *   id, title, page_title (nullable), description (nullable text),
+ *   order_no (default 0), status (active/inactive), timestamps.
  *
- * Placeholders marked with [BITTE ERGÄNZEN] must be filled in once the
- * corresponding authority data is available:
+ * NOTE: these are TEMPLATE texts tailored to StepNow Rides & Movers e.K.
+ * They cover baseline legal requirements for a Mietwagen + Paketdienst
+ * operation, but should be reviewed by a German Rechtsanwalt before
+ * going live.
+ *
+ * Placeholders [BITTE ERGÄNZEN] must be filled in once available:
  *   - USt-IdNr (once issued by Finanzamt)
  *   - PBefG-Konzessionsnummer (once issued by Landratsamt Esslingen)
  *
- * Legal basis for each page:
+ * Legal basis per page:
  *   - Impressum  → § 5 TMG + § 18 MStV
  *   - Datenschutz → Art. 13 DSGVO + § 25 TTDSG
- *   - AGB        → §§ 305–310 BGB (general T&C framework)
+ *   - AGB        → §§ 305–310 BGB
  *   - Cookies    → § 25 TTDSG + Art. 6(1) DSGVO
  *   - Widerruf   → § 312g BGB / EU VRRL
  */
@@ -30,89 +33,55 @@ class PolicySeeder extends Seeder
     public function run(): void
     {
         $policies = [
-            // ==========================================================
-            // 1) IMPRESSUM
-            // ==========================================================
             [
-                'id'           => 1,
-                'title'        => 'Impressum',
-                'page_title'   => 'Impressum',
-                'description'  => $this->impressum(),
-                'meta_title'   => 'Impressum – StepNow Rides & Movers e.K.',
-                'meta_keyword' => 'Impressum, StepNow Rides, Naeem Ahmad, Deizisau',
-                'meta_description' => 'Impressum nach § 5 TMG für StepNow Rides & Movers e.K., Mietwagen- und Paketdienstunternehmen in Deizisau, Landkreis Esslingen.',
-                'slug'         => 'impressum',
-                'status'       => 'active',
-                'created_at'   => '2026-04-24 12:00:00',
-                'updated_at'   => now(),
+                'id'          => 1,
+                'title'       => 'Impressum',
+                'page_title'  => 'Impressum',
+                'description' => $this->impressum(),
+                'order_no'    => 1,
+                'status'      => 'active',
+                'created_at'  => '2026-04-24 12:00:00',
+                'updated_at'  => now(),
             ],
-
-            // ==========================================================
-            // 2) DATENSCHUTZERKLÄRUNG
-            // ==========================================================
             [
-                'id'           => 2,
-                'title'        => 'Datenschutzerklärung',
-                'page_title'   => 'Datenschutzerklärung',
-                'description'  => $this->datenschutz(),
-                'meta_title'   => 'Datenschutzerklärung – StepNow Rides & Movers e.K.',
-                'meta_keyword' => 'Datenschutz, DSGVO, StepNow Rides, Deizisau',
-                'meta_description' => 'Informationen zur Verarbeitung personenbezogener Daten nach Art. 13 DSGVO bei StepNow Rides & Movers e.K.',
-                'slug'         => 'datenschutz',
-                'status'       => 'active',
-                'created_at'   => '2026-04-24 12:00:00',
-                'updated_at'   => now(),
+                'id'          => 2,
+                'title'       => 'Datenschutzerklärung',
+                'page_title'  => 'Datenschutzerklärung',
+                'description' => $this->datenschutz(),
+                'order_no'    => 2,
+                'status'      => 'active',
+                'created_at'  => '2026-04-24 12:00:00',
+                'updated_at'  => now(),
             ],
-
-            // ==========================================================
-            // 3) AGB
-            // ==========================================================
             [
-                'id'           => 3,
-                'title'        => 'Allgemeine Geschäftsbedingungen',
-                'page_title'   => 'AGB',
-                'description'  => $this->agb(),
-                'meta_title'   => 'AGB – StepNow Rides & Movers e.K.',
-                'meta_keyword' => 'AGB, Geschäftsbedingungen, Mietwagen, Paketdienst',
-                'meta_description' => 'Allgemeine Geschäftsbedingungen für Mietwagen- und Paketdienstleistungen der StepNow Rides & Movers e.K.',
-                'slug'         => 'agb',
-                'status'       => 'active',
-                'created_at'   => '2026-04-24 12:00:00',
-                'updated_at'   => now(),
+                'id'          => 3,
+                'title'       => 'Allgemeine Geschäftsbedingungen',
+                'page_title'  => 'AGB',
+                'description' => $this->agb(),
+                'order_no'    => 3,
+                'status'      => 'active',
+                'created_at'  => '2026-04-24 12:00:00',
+                'updated_at'  => now(),
             ],
-
-            // ==========================================================
-            // 4) COOKIE-RICHTLINIE
-            // ==========================================================
             [
-                'id'           => 4,
-                'title'        => 'Cookie-Richtlinie',
-                'page_title'   => 'Cookie-Richtlinie',
-                'description'  => $this->cookies(),
-                'meta_title'   => 'Cookie-Richtlinie – StepNow Rides & Movers e.K.',
-                'meta_keyword' => 'Cookies, TTDSG, Tracking',
-                'meta_description' => 'Informationen über die Verwendung von Cookies auf step-now.de nach § 25 TTDSG.',
-                'slug'         => 'cookies',
-                'status'       => 'active',
-                'created_at'   => '2026-04-24 12:00:00',
-                'updated_at'   => now(),
+                'id'          => 4,
+                'title'       => 'Cookie-Richtlinie',
+                'page_title'  => 'Cookie-Richtlinie',
+                'description' => $this->cookies(),
+                'order_no'    => 4,
+                'status'      => 'active',
+                'created_at'  => '2026-04-24 12:00:00',
+                'updated_at'  => now(),
             ],
-
-            // ==========================================================
-            // 5) WIDERRUFSBELEHRUNG
-            // ==========================================================
             [
-                'id'           => 5,
-                'title'        => 'Widerrufsbelehrung',
-                'page_title'   => 'Widerrufsbelehrung',
-                'description'  => $this->widerruf(),
-                'meta_title'   => 'Widerrufsbelehrung – StepNow Rides & Movers e.K.',
-                'meta_keyword' => 'Widerruf, Verbraucherrechte, Stornierung',
-                'meta_description' => 'Widerrufsbelehrung für Verbraucher nach § 312g BGB für Buchungen bei StepNow Rides & Movers e.K.',
-                'slug'         => 'widerruf',
-                'status'       => 'active',
-                'created_at'   => '2026-04-24 12:00:00',
-                'updated_at'   => now(),
+                'id'          => 5,
+                'title'       => 'Widerrufsbelehrung',
+                'page_title'  => 'Widerrufsbelehrung',
+                'description' => $this->widerruf(),
+                'order_no'    => 5,
+                'status'      => 'active',
+                'created_at'  => '2026-04-24 12:00:00',
+                'updated_at'  => now(),
             ],
         ];
 
@@ -346,7 +315,7 @@ begrenzt auf den vertragstypisch vorhersehbaren Schaden. Für Pakettransporte ge
 <h3>§ 8 Datenschutz</h3>
 <p>
 Der Anbieter verarbeitet personenbezogene Daten des Kunden ausschließlich im Rahmen der gesetzlichen
-Bestimmungen. Details finden sich in der <a href="/policy/datenschutz">Datenschutzerklärung</a>.
+Bestimmungen. Details finden sich in der Datenschutzerklärung.
 </p>
 
 <h3>§ 9 Anwendbares Recht und Gerichtsstand</h3>
@@ -427,7 +396,7 @@ und bei Fernabsatzverträgen grundsätzlich zu.
 <strong>Hinweis:</strong> Nach § 312 Abs. 2 Nr. 5 BGB besteht <strong>kein Widerrufsrecht</strong> bei Verträgen zur
 Erbringung von Dienstleistungen im Zusammenhang mit <strong>Personenbeförderung</strong> zu einem bestimmten Termin
 oder in einem bestimmten Zeitraum. Für Mietwagenfahrten mit festem Termin gilt daher ausschließlich unsere
-Stornoregelung nach § 5 der <a href="/policy/agb">AGB</a>.
+Stornoregelung nach § 5 der AGB.
 </p>
 
 <h3>Widerrufsrecht für Paketdienstleistungen</h3>
