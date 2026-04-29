@@ -3,18 +3,22 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Renders the legally required pages from the `policies` table.
  *
- * Single source of truth: rows are written by Database\Seeders\PolicySeeder.
- * To update wording in production, edit PolicySeeder and re-seed:
+ * Bilingual logic:
+ *   if (locale === 'en' AND description_en non-empty)
+ *       → serve description_en + page_title_en
+ *   else
+ *       → serve description + page_title  (German, legally authoritative)
+ *
+ * Single source of truth: PolicySeeder writes the rows; this controller
+ * reads them. To update legal wording:
  *
  *   php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
- *
- * The controller looks rows up by `title` (not by `id`) so the DB rows
- * can be re-ordered without breaking the front routes.
  */
 class PolicyController extends Controller
 {
@@ -43,10 +47,6 @@ class PolicyController extends Controller
         return $this->render('Cookie-Richtlinie');
     }
 
-    /**
-     * Fetch the active policy row by title and render it through
-     * resources/views/front/pages/policy.blade.php.
-     */
     private function render(string $title)
     {
         $policy = DB::table('policies')
@@ -56,6 +56,15 @@ class PolicyController extends Controller
 
         if (!$policy) {
             abort(404);
+        }
+
+        $locale = App::getLocale();
+
+        if ($locale === 'en' && filled($policy->description_en ?? null)) {
+            return view('front.pages.policy', [
+                'page_title'  => $policy->page_title_en ?: $policy->title,
+                'description' => $policy->description_en,
+            ]);
         }
 
         return view('front.pages.policy', [

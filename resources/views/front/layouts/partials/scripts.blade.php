@@ -1,13 +1,14 @@
 {{--
     Front-end JS bundle.
 
-    Compliance changes:
-      - Notyf is now loaded from /front/assets/js/vendor/notyf.min.js
-        (was: cdn.jsdelivr.net). See public/front/assets/css/vendor/README.md
-        for the install command.
-      - A `stepnow.consent.changed` event listener is wired up so that
-        any future analytics integration can be plugged in cleanly without
-        firing before consent is granted.
+    Compliance / i18n changes:
+      - Notyf is loaded from /front/assets/js/vendor/notyf.min.js
+        (was: cdn.jsdelivr.net). See public/front/assets/css/vendor/README.md.
+      - A `stepnow.consent.changed` event listener is wired up so any
+        analytics / marketing snippet only loads after consent is granted.
+      - AJAX error toasts ("Too many requests…", "Something went wrong…")
+        are pre-translated server-side via @json(__())) and stashed in
+        `window.STEPNOW_I18N`. The locale at page load is the one used.
 --}}
 
 <script src="{{ asset('front/assets/js/vendor/notyf.min.js') }}"></script>
@@ -40,6 +41,13 @@
 <script src="{{ asset('front/assets/js/script.js') }}"></script>
 
 <script>
+    // ---- i18n strings for client-side toasts -----------------------------
+    // Server resolves these per the active locale and inlines them.
+    window.STEPNOW_I18N = {
+        tooManyRequests: @json(__('Too many requests. Please try again in a minute.')),
+        genericError:    @json(__('Something went wrong. Please try again.')),
+    };
+
     // Notyf — toast notification config (no external network call).
     var notyf = new Notyf({
         duration: 3000,
@@ -63,12 +71,12 @@
     /**
      * Consent-gated integration hook.
      *
-     * This is where any analytics / marketing snippet must be loaded —
-     * NOT in the <head>. The cookie banner dispatches this event whenever
-     * the user changes their preferences, and also at first page load
+     * Where any analytics / marketing snippet must be loaded — NOT in the
+     * <head>. The cookie banner dispatches `stepnow.consent.changed`
+     * whenever the user changes preferences, and at first page load
      * after the choice is read from localStorage.
      *
-     * Example (when you add Plausible Analytics later):
+     * Example (when adding Plausible Analytics later):
      *   document.addEventListener('stepnow.consent.changed', function (e) {
      *     if (e.detail.statistics && !window.plausible) {
      *         var s = document.createElement('script');
@@ -78,8 +86,6 @@
      *         document.head.appendChild(s);
      *     }
      *   });
-     *
-     * Today, no analytics is loaded. The hook is here for future use.
      */
 </script>
 
@@ -110,9 +116,9 @@
                             input.after('<div class="invalid-feedback">' + value[0] + '</div>');
                         });
                     } else if (xhr.status === 429) {
-                        notyf.error("Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut.");
+                        notyf.error(window.STEPNOW_I18N.tooManyRequests);
                     } else {
-                        notyf.error("Etwas ist schiefgelaufen, bitte erneut versuchen.");
+                        notyf.error(window.STEPNOW_I18N.genericError);
                     }
                 },
             });
@@ -147,9 +153,9 @@
                             input.after('<div class="invalid-feedback">' + value[0] + '</div>');
                         });
                     } else if (xhr.status === 429) {
-                        notyf.error("Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut.");
+                        notyf.error(window.STEPNOW_I18N.tooManyRequests);
                     } else {
-                        notyf.error("Etwas ist schiefgelaufen, bitte erneut versuchen.");
+                        notyf.error(window.STEPNOW_I18N.genericError);
                     }
                 },
             });
@@ -160,7 +166,7 @@
 <script>
     // Newsletter form AJAX submit (Double-Opt-In)
     $(document).ready(function() {
-        $("#newsLetterForm").on("submit", function(e) {
+        $("#newsletterForm").on("submit", function(e) {
             e.preventDefault();
             let form = $(this);
             let formData = form.serialize();
@@ -178,18 +184,12 @@
                         let firstError = Object.values(xhr.responseJSON.errors)[0][0];
                         notyf.error(firstError);
                     } else if (xhr.status === 429) {
-                        notyf.error("Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut.");
+                        notyf.error(window.STEPNOW_I18N.tooManyRequests);
                     } else {
-                        notyf.error("Etwas ist schiefgelaufen, bitte erneut versuchen.");
+                        notyf.error(window.STEPNOW_I18N.genericError);
                     }
                 },
             });
         });
     });
 </script>
-
-
-<a href="#" data-target="html" class="scroll-to-target scroll-to-top">
-    <span class="scroll-to-top__wrapper"><span class="scroll-to-top__inner"></span></span>
-    <span class="scroll-to-top__text">Zurück nach oben</span>
-</a>

@@ -1,33 +1,29 @@
 @extends('front.layouts.master')
-@section('title', 'Newsletter abgemeldet')
-@section('css')
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/page-header.css') }}" />
-@endsection
+@section('title', __('Newsletter unsubscribed'))
 @section('content')
 
-    <section class="page-header">
-        <div class="container">
-            <div class="page-header__inner">
-                <h3>Abmeldung erfolgreich</h3>
-            </div>
-        </div>
-    </section>
+@include('front.layouts.partials.banner', [
+    'title'    => __('Unsubscribe successful'),
+    'subTitle' => __('Newsletter unsubscribed'),
+])
 
-    <section style="padding: 80px 0;">
-        <div class="container">
-            <div class="row justify-content-center text-center">
-                <div class="col-lg-8">
-                    <h2 style="margin-bottom: 1rem;">Schade, dass Sie gehen.</h2>
-                    <p style="font-size: 1.1rem;">
-                        Ihre E-Mail-Adresse wurde aus dem Newsletter-Verteiler entfernt.
-                        Sie erhalten keine weiteren Newsletter-Mails von uns.
-                    </p>
-                    <p style="margin-top: 2rem;">
-                        <a href="{{ route('front.index') }}" class="thm-btn">Zur Startseite</a>
-                    </p>
-                </div>
+<section class="page-content" style="padding: 60px 0;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div style="font-size: 4rem; color: #6c757d; margin-bottom: 18px;">✕</div>
+                <h2>{{ __('Sorry to see you go.') }}</h2>
+                <p style="font-size: 1.05rem; line-height: 1.6; color: #555;">
+                    {{ __('Your email address has been removed from the newsletter list. You will no longer receive newsletter emails from us.') }}
+                </p>
+                <p style="margin-top: 30px;">
+                    <a href="{{ route('front.index') }}" class="thm-btn">
+                        {{ __('Back to home') }}
+                    </a>
+                </p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
 @endsection

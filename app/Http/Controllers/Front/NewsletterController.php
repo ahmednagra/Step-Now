@@ -12,46 +12,39 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 /**
- * Public newsletter sign-up with German Double-Opt-In (DOI).
+ * Public newsletter sign-up with German Double-Opt-In (DOI) — bilingual.
  *
- * Why DOI is required (BGH 10.02.2011, I ZR 164/09; § 7 UWG):
- *   - Storing an e-mail address and sending a newsletter without a
- *     confirmation step is treated as unsolicited commercial
- *     communication (Spam) and is one of the most common Abmahn
- *     causes in Germany.
+ * DOI flow:
+ *   1. Visitor posts /newsletter-store with email + consent checkbox.
+ *   2. We persist the row with a random token, status=1, confirmed_at=null.
+ *   3. We mail the visitor a link to /newsletter/confirm/{token}.
+ *   4. Visiting that link sets confirmed_at to NOW. Only then is the row
+ *      treated as a confirmed subscriber by anything that reads the table.
  *
- * Flow:
- *   1. POST /newsletter-store
- *        validate input + consent checkbox
- *        create row with confirmation_token + ip + ua
- *        send DOI mail with /newsletter/confirm/{token}
- *   2. GET /newsletter/confirm/{token}
- *        flip confirmed_at = now()
- *        from this point on the address is an active subscriber
- *   3. GET /newsletter/unsubscribe/{token}
- *        soft-delete the row
- *
- * The honeypot field `website` MUST stay empty for real users.
+ * Translation strategy is identical to FrontController: keys are English
+ * strings; lang/de.json maps them to German. The validation rule keys
+ * (e.g. 'email.required') stay in code; their messages translate.
  */
 class NewsletterController extends Controller
 {
     public function store(Request $request)
     {
-        // Honeypot — bots fill this, humans don't see it.
+        // Honeypot — bots fill `website`. Drop silently with a fake-success
+        // response so a bot's Sentry / log doesn't tip them off.
         if (filled($request->input('website'))) {
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Bitte prüfen Sie Ihren Posteingang, um die Anmeldung zu bestätigen.',
+                'message' => __('Please check your inbox to confirm your subscription.'),
             ]);
         }
 
         $validator = Validator::make($request->all(), [
             'email'   => 'required|email|max:255',
-            'consent' => 'accepted',  // checkbox must be checked
+            'consent' => 'accepted',
         ], [
-            'email.required'   => 'Bitte geben Sie eine E-Mail-Adresse an.',
-            'email.email'      => 'Bitte geben Sie eine gültige E-Mail-Adresse an.',
-            'consent.accepted' => 'Bitte bestätigen Sie die Einwilligung zur Datenverarbeitung.',
+            'email.required'   => __('Please enter an email address.'),
+            'email.email'      => __('Please enter a valid email address.'),
+            'consent.accepted' => __('Please confirm your consent to the data processing.'),
         ]);
 
         if ($validator->fails()) {
@@ -63,20 +56,16 @@ class NewsletterController extends Controller
 
         $email = strtolower(trim($request->input('email')));
 
-        // If the address is already a confirmed subscriber, do not leak that
-        // fact (privacy by design) — answer with the same generic message
-        // the user would see for a fresh sign-up.
+        // If they're already confirmed, don't disclose that — return the
+        // same generic "check your inbox" answer either way.
         $existing = Newsletter::withTrashed()->where('email', $email)->first();
         if ($existing && $existing->confirmed_at) {
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Bitte prüfen Sie Ihren Posteingang, um die Anmeldung zu bestätigen.',
+                'message' => __('Please check your inbox to confirm your subscription.'),
             ]);
         }
 
-        // (Re)issue confirmation token. Use updateOrCreate so an unconfirmed
-        // row from a previous attempt is reused rather than blocked by the
-        // unique-email constraint.
         $token = Str::random(64);
 
         Newsletter::updateOrCreate(
@@ -91,12 +80,10 @@ class NewsletterController extends Controller
             ]
         );
 
-        // Send DOI mail. Failures are logged but don't expose internal
-        // errors to the user (they would only confirm the address exists
-        // in the system).
         try {
             Mail::to($email)->send(new NewsletterConfirmation($token));
         } catch (\Throwable $e) {
+            // Log English. The user gets a generic message either way.
             Log::error('Newsletter DOI mail failed', [
                 'email' => $email,
                 'error' => $e->getMessage(),
@@ -105,7 +92,7 @@ class NewsletterController extends Controller
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Bitte prüfen Sie Ihren Posteingang, um die Anmeldung zu bestätigen.',
+            'message' => __('Please check your inbox to confirm your subscription.'),
         ]);
     }
 
@@ -130,7 +117,7 @@ class NewsletterController extends Controller
         $row = Newsletter::where('confirmation_token', $token)->first();
 
         if ($row) {
-            $row->delete(); // soft-delete (deleted_at)
+            $row->delete();
         }
 
         return view('front.pages.newsletter-unsubscribed');

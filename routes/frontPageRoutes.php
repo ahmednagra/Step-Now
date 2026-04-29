@@ -4,24 +4,24 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\FrontController;
 use App\Http\Controllers\Front\PolicyController;
 use App\Http\Controllers\Front\NewsletterController;
+use App\Http\Controllers\LocaleController;
 
 /*
  |--------------------------------------------------------------------------
  | Frontend Routes
  |--------------------------------------------------------------------------
  |
- | Public-facing routes for step-now.de.
- |
  | Notes:
- |  - Throttle middleware is applied to all public POST endpoints
- |    (booking, contact, newsletter) to mitigate spam / abuse, which is
- |    one of the technische und organisatorische Maßnahmen required by
- |    Art. 32 DSGVO. Limit: 5 requests per minute per IP.
- |  - The five legal pages (Impressum, Datenschutz, AGB, Widerruf, Cookies)
- |    are served from the `policies` table via PolicyController. They
- |    must remain reachable in <= 2 clicks from every page (BGH 2-Klick-
- |    Regel) — see the footer template for the link block.
+ |  - Throttle middleware on POST endpoints — Art. 32 DSGVO TOMs. 5/min/IP.
+ |  - Five legal pages served from `policies` table via PolicyController.
+ |    Bilingual: picks the EN column when locale=='en' AND it has content.
+ |  - /locale/{lang} switches language and redirects back to Referer.
  */
+
+// ----- Locale switcher ------------------------------------------------------
+Route::get('/locale/{lang}', [LocaleController::class, 'switch'])
+    ->where('lang', 'de|en')
+    ->name('locale.switch');
 
 // ----- Public pages ---------------------------------------------------------
 Route::get('/',                  [FrontController::class, 'index'])->name('front.index');
@@ -40,14 +40,13 @@ Route::middleware('throttle:5,1')->group(function () {
     Route::post('/newsletter-store', [NewsletterController::class, 'store'])->name('front.newsletter.store');
 });
 
-// ----- Newsletter Double-Opt-In confirmation (signed URL) -------------------
+// ----- Newsletter Double-Opt-In ---------------------------------------------
 Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])
     ->name('front.newsletter.confirm');
 Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])
     ->name('front.newsletter.unsubscribe');
 
-// ----- Legal pages (DDG / DSGVO / TDDDG) ------------------------------------
-// These are MANDATORY and must remain reachable from every page footer.
+// ----- Legal pages (DDG / DSGVO / TDDDG) — bilingual ------------------------
 Route::get('/impressum',          [PolicyController::class, 'impressum'])->name('front.impressum');
 Route::get('/datenschutz',        [PolicyController::class, 'datenschutz'])->name('front.datenschutz');
 Route::get('/agb',                [PolicyController::class, 'agb'])->name('front.agb');

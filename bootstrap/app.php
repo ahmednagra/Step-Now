@@ -16,11 +16,19 @@ return Application::configure(basePath: dirname(__DIR__))
     )
 
     ->withMiddleware(function (Middleware $middleware) {
+        // SetLocale runs on every web request so the chosen language is
+        // applied before any controller / view fires. Appended to the
+        // 'web' group rather than 'global' so it has access to the
+        // session (needed to read session('locale')).
+        $middleware->appendToGroup('web', SetLocale::class);
+
         $middleware->alias([
-            'status' => CheckUserStatus::class,
-            'admin' => Admin::class,
-            'user' => User::class,
-            "locale" => Localization::class,
-            "SetLocale" => SetLocale::class,
+            'status'    => CheckUserStatus::class,
+            'admin'     => Admin::class,
+            'user'      => User::class,
+            'locale'    => Localization::class,
+            'SetLocale' => SetLocale::class, // alias kept for backwards-compat
         ]);
-    }) ->withExceptions(function (Exceptions $exceptions) {})->create();
+    })
+    ->withExceptions(function (Exceptions $exceptions) {})
+    ->create();

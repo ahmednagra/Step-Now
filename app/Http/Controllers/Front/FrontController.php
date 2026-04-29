@@ -19,25 +19,48 @@ use App\Models\{
 };
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Public-facing controller for step-now.de.
+ *
+ * i18n approach:
+ *   - All user-visible strings in this file are wrapped with __() so they
+ *     resolve against lang/de.json or lang/en.json depending on the
+ *     locale set by App\Http\Middleware\SetLocale.
+ *   - Translation keys are English (e.g. __('Please enter your name.')).
+ *     Laravel's __() with a missing key returns the key unchanged, so
+ *     English locale needs no en.json entry — the key IS the English string.
+ *   - Validation rule keys (e.g. 'full_name.required') stay in code.
+ *     Their MESSAGES are translated.
+ *   - Database columns stay English (full_name, booking_date, etc.) —
+ *     they're internal identifiers, never shown.
+ *   - \Log::error messages stay English — log files are read by the
+ *     developer / sysadmin, not customers.
+ */
 class FrontController extends Controller
 {
+    /* =====================================================================
+     * GET endpoints — render pages
+     * =====================================================================*/
 
     public function index()
     {
-        $sliders = Slider::where('status', 1)->orderBy('serial_no', 'ASC')->get();
+        $sliders       = Slider::where('status', 1)->orderBy('serial_no', 'ASC')->get();
         $why_choose_us = WhyChooseUsSection::where('show_on', 'home')->first();
-        $about_us = InfoBlock::first();
-        $faq = FaqSection::first();
-        $testimonial = TestimonialSection::first();
-        $services = Service::where('status', 'publish')->where('isfeature', 'featured')->get();
-        return view('front.index', compact('testimonial', 'sliders', 'services', 'why_choose_us', 'about_us', 'faq'));
+        $about_us      = InfoBlock::first();
+        $faq           = FaqSection::first();
+        $testimonial   = TestimonialSection::first();
+        $services      = Service::where('status', 'publish')->where('isfeature', 'featured')->get();
+
+        return view('front.index', compact(
+            'testimonial', 'sliders', 'services', 'why_choose_us', 'about_us', 'faq'
+        ));
     }
 
     public function aboutUs()
     {
-        $about_us = InfoBlock::first();
+        $about_us      = InfoBlock::first();
         $why_choose_us = WhyChooseUsSection::first();
-        $testimonial = TestimonialSection::first();
+        $testimonial   = TestimonialSection::first();
         return view('front.pages.about-us', compact('about_us', 'testimonial', 'why_choose_us'));
     }
 
@@ -54,11 +77,15 @@ class FrontController extends Controller
 
     public function serviceDetail($slug)
     {
-        $service = Service::where('slug', $slug)->where('status', 'publish')->with('serviceCategory')->firstOrFail();
+        $service = Service::where('slug', $slug)
+            ->where('status', 'publish')
+            ->with('serviceCategory')
+            ->firstOrFail();
+
         $relatedServices = Service::where('service_category_id', $service->service_category_id)
-                              ->where('id', '!=', $service->id)
-                              ->take(6)
-                              ->get();
+            ->where('id', '!=', $service->id)
+            ->take(6)
+            ->get();
 
         return view('front.pages.service_detail', compact('service', 'relatedServices'));
     }
@@ -81,17 +108,30 @@ class FrontController extends Controller
 
     public function rentNow($id)
     {
-        $package = Package::where('id', $id)->where('status', 'active')->where('publish', 'published')->firstOrFail();
+        $package = Package::where('id', $id)
+            ->where('status', 'active')
+            ->where('publish', 'published')
+            ->firstOrFail();
         return view('front.pages.rent-now', compact('package'));
     }
 
+    public function gallery()
+    {
+        return view('front.pages.gallery');
+    }
+
+    /* =====================================================================
+     * POST endpoints — store contact / booking
+     * =====================================================================*/
+
     public function contactUsStore(Request $request)
     {
-        // Honeypot — bots fill this, humans don't see it.
+        // Honeypot — bots fill 'website', humans don't see it.
+        // We respond with a generic success and silently drop the input.
         if (filled($request->input('website'))) {
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Ihre Nachricht wurde erfolgreich übermittelt!',
+                'message' => __('Your message has been sent successfully!'),
             ]);
         }
 
@@ -102,12 +142,12 @@ class FrontController extends Controller
             'subject'         => 'required|string|max:255',
             'enquiry_message' => 'required|string|max:1000',
         ], [
-            'name.required'            => 'Bitte geben Sie Ihren Namen an.',
-            'phone_no.required'        => 'Bitte geben Sie Ihre Telefonnummer an.',
-            'email.required'           => 'Bitte geben Sie eine E-Mail-Adresse an.',
-            'email.email'              => 'Bitte geben Sie eine gültige E-Mail-Adresse an.',
-            'subject.required'         => 'Bitte geben Sie einen Betreff an.',
-            'enquiry_message.required' => 'Bitte geben Sie eine Nachricht ein.',
+            'name.required'            => __('Please enter your name.'),
+            'phone_no.required'        => __('Please enter your phone number.'),
+            'email.required'           => __('Please enter an email address.'),
+            'email.email'              => __('Please enter a valid email address.'),
+            'subject.required'         => __('Please enter a subject.'),
+            'enquiry_message.required' => __('Please enter a message.'),
         ]);
 
         if ($validator->fails()) {
@@ -127,7 +167,7 @@ class FrontController extends Controller
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Ihre Nachricht wurde erfolgreich übermittelt! Wir melden uns zeitnah bei Ihnen.',
+            'message' => __('Your message has been sent successfully! We will get back to you shortly.'),
         ]);
     }
 
@@ -137,7 +177,7 @@ class FrontController extends Controller
         if (filled($request->input('website'))) {
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Ihre Buchungsanfrage wurde erfolgreich übermittelt!',
+                'message' => __('Your booking request has been sent successfully!'),
             ]);
         }
 
@@ -153,18 +193,18 @@ class FrontController extends Controller
             'no_of_people' => 'required|integer|min:1|max:20',
             'message'      => 'nullable|string|max:1000',
         ], [
-            'full_name.required'           => 'Bitte geben Sie Ihren vollständigen Namen an.',
-            'email.required'               => 'Bitte geben Sie eine E-Mail-Adresse an.',
-            'email.email'                  => 'Bitte geben Sie eine gültige E-Mail-Adresse an.',
-            'phone.required'               => 'Bitte geben Sie Ihre Telefonnummer an.',
-            'pickup.required'              => 'Bitte geben Sie einen Abholort an.',
-            'booking_date.required'        => 'Bitte wählen Sie ein Datum.',
-            'booking_date.after_or_equal'  => 'Das Buchungsdatum muss heute oder in der Zukunft liegen.',
-            'booking_time.required'        => 'Bitte wählen Sie eine Uhrzeit.',
-            'booking_time.date_format'     => 'Bitte wählen Sie eine gültige Uhrzeit (Format HH:MM).',
-            'no_of_people.required'        => 'Bitte geben Sie die Anzahl der Personen an.',
-            'no_of_people.min'             => 'Die Anzahl der Personen muss mindestens 1 betragen.',
-            'no_of_people.max'             => 'Maximal 20 Personen pro Buchung.',
+            'full_name.required'           => __('Please enter your full name.'),
+            'email.required'               => __('Please enter an email address.'),
+            'email.email'                  => __('Please enter a valid email address.'),
+            'phone.required'               => __('Please enter your phone number.'),
+            'pickup.required'              => __('Please enter a pickup location.'),
+            'booking_date.required'        => __('Please select a date.'),
+            'booking_date.after_or_equal'  => __('The booking date must be today or in the future.'),
+            'booking_time.required'        => __('Please select a time.'),
+            'booking_time.date_format'     => __('Please select a valid time (HH:MM).'),
+            'no_of_people.required'        => __('Please enter the number of people.'),
+            'no_of_people.min'             => __('Number of people must be at least 1.'),
+            'no_of_people.max'             => __('Maximum 20 people per booking.'),
         ]);
 
         if ($validator->fails()) {
@@ -191,13 +231,14 @@ class FrontController extends Controller
 
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Ihre Buchungsanfrage wurde erfolgreich übermittelt! Wir bestätigen Ihre Buchung in Kürze.',
+                'message' => __('Your booking request has been sent successfully! We will confirm your booking shortly.'),
             ]);
         } catch (\Exception $e) {
+            // Logs stay English — they are read by developers, not customers.
             \Log::error('Booking Store Error: ' . $e->getMessage());
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+                'message' => __('Something went wrong. Please try again.'),
             ], 500);
         }
     }

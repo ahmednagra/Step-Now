@@ -1,7 +1,6 @@
 @include('front.partials.cta.cta-1')
 <footer class="site-footer">
-    <div class="site-footer__bg" style="background-image: url({{ asset('front') }}/assets/images/video-pic1.jpg);">
-    </div>
+    <div class="site-footer__bg" style="background-image: url({{ asset('front') }}/assets/images/video-pic1.jpg);"></div>
     <div class="site-footer__top">
         <div class="container">
             <div class="site-footer__top-inner">
@@ -16,8 +15,7 @@
                                 </a>
                             </div>
                             <p class="footer-widget__about-text">
-                                Ihr zuverlässiger Partner für Personenbeförderung im Mietwagenverkehr und Paketdienst
-                                in Deizisau und der Region Esslingen.
+                                {{ __('Your reliable partner for hire-car passenger transport and parcel delivery in Deizisau and the Esslingen region.') }}
                             </p>
                             <div class="thm-social-link1">
                                 <ul class="social-box list-unstyled">
@@ -41,53 +39,52 @@
                         </div>
                     </div>
 
-                    {{-- Schnellzugriff --}}
+                    {{-- Quick Links --}}
                     <div class="col-xl-2 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="200ms">
                         <div class="footer-widget__links">
-                            <h4 class="footer-widget__title">Schnellzugriff</h4>
+                            <h4 class="footer-widget__title">{{ __('Quick Links') }}</h4>
                             <ul class="footer-widget__links-list list-unstyled">
-                                <li><a href="{{ route('front.about') }}">Über uns</a></li>
-                                <li><a href="{{ route('front.services') }}">Unsere Services</a></li>
-                                <li><a href="{{ route('front.pricing') }}">Preise</a></li>
-                                <li><a href="{{ route('front.contactus') }}">Kontakt</a></li>
+                                <li><a href="{{ route('front.about') }}">{{ __('About us') }}</a></li>
+                                <li><a href="{{ route('front.services') }}">{{ __('Our Services') }}</a></li>
+                                <li><a href="{{ route('front.pricing') }}">{{ __('Pricing') }}</a></li>
+                                <li><a href="{{ route('front.contactus') }}">{{ __('Contact') }}</a></li>
                             </ul>
                         </div>
                     </div>
 
-                    {{-- Rechtliches — REQUIRED on every page (BGH 2-Klick-Regel) --}}
-                    {{-- Driven by AppServiceProvider::boot() $policies share.    --}}
+                    {{-- Legal — REQUIRED on every page (BGH 2-Klick-Regel) --}}
                     <div class="col-xl-3 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="300ms">
                         <div class="footer-widget__links">
-                            <h4 class="footer-widget__title">Rechtliches</h4>
+                            <h4 class="footer-widget__title">{{ __('Legal') }}</h4>
                             <ul class="footer-widget__links-list list-unstyled">
                                 @if(isset($policies) && $policies->has('Impressum'))
-                                    <li><a href="{{ route('front.impressum') }}">Impressum</a></li>
+                                    <li><a href="{{ route('front.impressum') }}">{{ __('Imprint') }}</a></li>
                                 @endif
                                 @if(isset($policies) && $policies->has('Datenschutzerklärung'))
-                                    <li><a href="{{ route('front.datenschutz') }}">Datenschutzerklärung</a></li>
+                                    <li><a href="{{ route('front.datenschutz') }}">{{ __('Privacy Policy') }}</a></li>
                                 @endif
                                 @if(isset($policies) && $policies->has('Allgemeine Geschäftsbedingungen'))
-                                    <li><a href="{{ route('front.agb') }}">AGB</a></li>
+                                    <li><a href="{{ route('front.agb') }}">{{ __('Terms & Conditions') }}</a></li>
                                 @endif
                                 @if(isset($policies) && $policies->has('Widerrufsbelehrung'))
-                                    <li><a href="{{ route('front.widerruf') }}">Widerrufsbelehrung</a></li>
+                                    <li><a href="{{ route('front.widerruf') }}">{{ __('Right of Withdrawal') }}</a></li>
                                 @endif
                                 @if(isset($policies) && $policies->has('Cookie-Richtlinie'))
-                                    <li><a href="{{ route('front.cookies') }}">Cookie-Richtlinie</a></li>
+                                    <li><a href="{{ route('front.cookies') }}">{{ __('Cookie Policy') }}</a></li>
                                 @endif
                                 <li>
                                     <a href="#" onclick="event.preventDefault(); if(window.stepnowConsent){window.stepnowConsent.openSettings();}">
-                                        Cookie-Einstellungen
+                                        {{ __('Cookie Settings') }}
                                     </a>
                                 </li>
                             </ul>
                         </div>
                     </div>
 
-                    {{-- Kontakt --}}
+                    {{-- Contact --}}
                     <div class="col-xl-4 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="400ms">
                         <div class="footer-widget__contact">
-                            <h3 class="footer-widget__title">Kontakt</h3>
+                            <h3 class="footer-widget__title">{{ __('Contact') }}</h3>
                             <ul class="footer-widget__contact-list list-unstyled">
                                 <li>
                                     <div class="icon"><span class="icon-pin"></span></div>
@@ -116,7 +113,7 @@
             <div class="row align-items-center">
                 <div class="col-md-12 text-center">
                     <p style="margin: 0; font-size: 0.85rem; opacity: 0.85;">
-                        &copy; {{ date('Y') }} StepNow Rides &amp; Movers e.K. &middot; Alle Rechte vorbehalten.
+                        &copy; {{ date('Y') }} StepNow Rides &amp; Movers e.K. &middot; {{ __('All rights reserved.') }}
                     </p>
                 </div>
             </div>
