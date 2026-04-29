@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() ?: 'de' }}">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title> @yield('title') | Mini Car </title>
+    <title>@yield('title') | StepNow Rides &amp; Movers</title>
+
+    {{-- Favicon (driven by settings, with fallback) --}}
+    @if(isset($setting) && $setting && $setting->fav_icon)
+        <link rel="shortcut icon" href="{{ asset($setting->fav_icon) }}" type="image/x-icon">
+    @endif
 
     @include('front.layouts.partials.styles')
 
@@ -34,9 +39,6 @@
 
         @include('front.layouts.partials.footer')
 
-
-
-
     </div><!-- /.page-wrapper -->
 
 
@@ -64,37 +66,27 @@
             <div class="thm-social-link1">
                 <ul class="social-box list-unstyled">
                     @if (!empty($setting->fb_link))
-                        <li><a href="{{ $setting->fb_link }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                        </li>
+                        <li><a href="{{ $setting->fb_link }}" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a></li>
                     @endif
                     @if (!empty($setting->insta_link))
-                        <li><a href="{{ $setting->insta_link }}" target="_blank"><i class="fab fa-instagram"></i></a>
-                        </li>
+                        <li><a href="{{ $setting->insta_link }}" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a></li>
                     @endif
                     @if (!empty($setting->yt_link))
-                        <li><a href="{{ $setting->yt_link }}" target="_blank"><i class="fab fa-youtube"></i></a>
-                        </li>
-                    @endif
-                    @if (!empty($setting->tiktok_link))
-                        <li><a href="{{ $setting->tiktok_link }}" target="_blank"> <i class="bi bi-tiktok"></i></a>
-                        </li>
+                        <li><a href="{{ $setting->yt_link }}" target="_blank" rel="noopener"><i class="fab fa-youtube"></i></a></li>
                     @endif
                     @if (!empty($setting->linkedin_link))
-                        <li><a href="{{ $setting->linkedin_link }}" target="_blank"><i
-                                    class="fab fa-linkedin-in"></i></a>
-                        </li>
+                        <li><a href="{{ $setting->linkedin_link }}" target="_blank" rel="noopener"><i class="fab fa-linkedin-in"></i></a></li>
                     @endif
                 </ul>
             </div>
-
         </div>
     </div>
 
-    {{-- <a href="#" data-target="html" class="scroll-to-target scroll-to-top">
-        <span class="scroll-to-top__wrapper"><span class="scroll-to-top__inner"></span></span>
-        <span class="scroll-to-top__text"> Go Back Top</span>
-    </a> --}}
+    {{-- Cookie consent banner — must load before any non-essential script  --}}
+    @include('front.partials.legal.cookie-consent')
 
+    {{-- All non-essential JS lives here. Tracking scripts must check the   --}}
+    {{-- window.stepnowConsent.statistics / .marketing flags before firing. --}}
     @include('front.layouts.partials.scripts')
 
 </body>

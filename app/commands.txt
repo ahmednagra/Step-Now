@@ -1,0 +1,189 @@
+# =============================================================================
+# step-now.de — deployment & maintenance commands
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. FIRST-TIME SETUP (fresh clone or fresh server)
+# -----------------------------------------------------------------------------
+
+git clone <repo-url> step-now-de
+cd step-now-de
+
+composer install --no-dev --optimize-autoloader
+npm install
+npm run build
+
+cp .env.example .env
+php artisan key:generate --force
+
+php artisan storage:link
+
+# Set folder permissions (Linux/macOS)
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+
+
+# -----------------------------------------------------------------------------
+# 2. DATABASE — first install (creates schema + seeds all tables)
+# -----------------------------------------------------------------------------
+
+php artisan migrate --force
+php artisan db:seed --force
+
+
+# -----------------------------------------------------------------------------
+# 3. APPLY THE COMPLIANCE PATCHES (after unzipping patches/ into project root)
+# -----------------------------------------------------------------------------
+
+# Run the new migration (adds DOI columns to newsletters table)
+php artisan migrate --force
+
+# Re-seed ONLY the legally controlled tables — single source of truth
+php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
+php artisan db:seed --class=Database\\Seeders\\SettingsTableSeeder --force
+
+# Clear and rebuild caches
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan cache:clear
+
+
+# -----------------------------------------------------------------------------
+# 4. UPDATE LEGAL TEXT (Impressum, Datenschutz, AGB, Widerruf, Cookies)
+# -----------------------------------------------------------------------------
+# Edit database/seeders/PolicySeeder.php, then:
+
+php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
+php artisan view:clear
+
+
+# -----------------------------------------------------------------------------
+# 5. UPDATE BUSINESS DATA (phone, email, address, social links)
+# -----------------------------------------------------------------------------
+# Either edit via admin UI at /setting, OR edit SettingsTableSeeder.php and:
+
+php artisan db:seed --class=Database\\Seeders\\SettingsTableSeeder --force
+php artisan view:clear
+
+
+# -----------------------------------------------------------------------------
+# 6. FULL DATABASE REFRESH — DESTRUCTIVE, drops everything
+# -----------------------------------------------------------------------------
+# Use this in local dev only. NEVER on production.
+
+php artisan migrate:fresh --seed
+
+
+# -----------------------------------------------------------------------------
+# 7. RUN INDIVIDUAL SEEDERS
+# -----------------------------------------------------------------------------
+
+php artisan db:seed --class=Database\\Seeders\\SettingsTableSeeder --force
+php artisan db:seed --class=Database\\Seeders\\UserSeeder --force
+php artisan db:seed --class=Database\\Seeders\\SliderSeeder --force
+php artisan db:seed --class=Database\\Seeders\\InfoBlockSeeder --force
+php artisan db:seed --class=Database\\Seeders\\WhyChooseUsSectionSeeder --force
+php artisan db:seed --class=Database\\Seeders\\TestimonialSectionSeeder --force
+php artisan db:seed --class=Database\\Seeders\\PackageCategorySeeder --force
+php artisan db:seed --class=Database\\Seeders\\PackageSeeder --force
+php artisan db:seed --class=Database\\Seeders\\FaqSeeder --force
+php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
+
+
+# -----------------------------------------------------------------------------
+# 8. ROLLBACK THE LAST MIGRATION
+# -----------------------------------------------------------------------------
+
+php artisan migrate:rollback --step=1
+
+
+# -----------------------------------------------------------------------------
+# 9. LOCAL DEVELOPMENT — start the site
+# -----------------------------------------------------------------------------
+
+php artisan serve
+# Site at http://localhost:8000
+
+# In a second terminal (for hot-reloading frontend assets):
+npm run dev
+
+
+# -----------------------------------------------------------------------------
+# 10. PRODUCTION DEPLOYMENT — every time you push new code
+# -----------------------------------------------------------------------------
+
+git pull origin main
+
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+
+php artisan migrate --force
+
+# Re-seed ONLY if PolicySeeder or SettingsTableSeeder changed
+php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
+php artisan db:seed --class=Database\\Seeders\\SettingsTableSeeder --force
+
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Restart the queue worker if you use one
+php artisan queue:restart
+
+
+# -----------------------------------------------------------------------------
+# 11. SELF-HOSTED VENDOR ASSETS (one-time on the deployment server)
+# -----------------------------------------------------------------------------
+# Replaces jsDelivr / cdnjs CDN dependencies with local copies.
+
+mkdir -p public/front/assets/css/vendor/fonts public/front/assets/js/vendor
+
+curl -sSL https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css \
+    -o public/front/assets/css/vendor/bootstrap-icons.min.css
+curl -sSL https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff2 \
+    -o public/front/assets/css/vendor/fonts/bootstrap-icons.woff2
+curl -sSL https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff \
+    -o public/front/assets/css/vendor/fonts/bootstrap-icons.woff
+curl -sSL https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css \
+    -o public/front/assets/css/vendor/notyf.min.css
+curl -sSL https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js \
+    -o public/front/assets/js/vendor/notyf.min.js
+
+
+# -----------------------------------------------------------------------------
+# 12. VERIFY COMPLIANCE — no leaks to third-party CDNs
+# -----------------------------------------------------------------------------
+
+grep -RIn "jsdelivr.net\|fonts.googleapis\|fonts.gstatic\|cdnjs.cloudflare" resources/views/front/ public/
+# Expected: zero matches
+
+grep -RIn "TMG\|TTDSG" database/seeders/PolicySeeder.php
+# Expected: only matches inside comments (documentation)
+
+grep -RIn "ec.europa.eu/consumers/odr" database/seeders/PolicySeeder.php
+# Expected: zero matches
+
+
+# -----------------------------------------------------------------------------
+# 13. TROUBLESHOOTING
+# -----------------------------------------------------------------------------
+
+# View live error log
+tail -f storage/logs/laravel.log
+
+# Check current routes
+php artisan route:list
+
+# Confirm policy rows are in the DB
+php artisan tinker
+>>> DB::table('policies')->pluck('title');
+
+# Test a route directly
+curl -sI https://step-now.de/impressum | head -1
+# Expected: HTTP/2 200
+
+# Force-clear the bytecode cache (rare — only after composer.json changes)
+composer dump-autoload -o
+php artisan optimize:clear

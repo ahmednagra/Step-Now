@@ -6,27 +6,40 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Policy pages — DSGVO / TMG / PBefG-compliant German legal texts.
+ * Policy pages — DSGVO / DDG / TDDDG / PBefG-compliant German legal texts.
  *
  * Schema matches migration 2025_11_12_000009_create_policies_table:
  *   id, title, page_title (nullable), description (nullable text),
  *   order_no (default 0), status (active/inactive), timestamps.
  *
- * NOTE: these are TEMPLATE texts tailored to StepNow Rides & Movers e.K.
- * They cover baseline legal requirements for a Mietwagen + Paketdienst
- * operation, but should be reviewed by a German Rechtsanwalt before
- * going live.
+ * Single source of truth: this seeder writes the rows and the front-end
+ * controller (App\Http\Controllers\Front\PolicyController) reads them
+ * back by `title`. To update wording in production:
  *
- * Placeholders [BITTE ERGÄNZEN] must be filled in once available:
- *   - USt-IdNr (once issued by Finanzamt)
- *   - PBefG-Konzessionsnummer (once issued by Landratsamt Esslingen)
+ *   php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
  *
- * Legal basis per page:
- *   - Impressum  → § 5 TMG + § 18 MStV
- *   - Datenschutz → Art. 13 DSGVO + § 25 TTDSG
- *   - AGB        → §§ 305–310 BGB
- *   - Cookies    → § 25 TTDSG + Art. 6(1) DSGVO
- *   - Widerruf   → § 312g BGB / EU VRRL
+ * Legal basis per page (CURRENT, post-14.05.2024 DDG/TDDDG transition):
+ *   - Impressum   → § 5 DDG + § 18 MStV
+ *   - Datenschutz → Art. 13/14 DSGVO + § 25 TDDDG
+ *   - AGB         → §§ 305–310 BGB
+ *   - Cookies     → § 25 TDDDG + Art. 6(1) DSGVO
+ *   - Widerruf    → § 312g BGB / EU VRRL
+ *
+ * Notes on legal updates baked in:
+ *   - TMG references replaced with DDG (in force since 14.05.2024).
+ *   - TTDSG references replaced with TDDDG (renamed 14.05.2024).
+ *   - EU OS-Plattform reference REMOVED (mandatory since 20.07.2025).
+ *   - Cloudflare disclosure added in Datenschutz §4a (Drittland-Übermittlung
+ *     into the USA must be named, EU-US Data Privacy Framework cited).
+ *   - Phone number is the one on the Gewerbeanmeldung GewA 1 (28.10.2025).
+ *
+ * Open items (to be filled in via the admin UI once available):
+ *   - USt-IdNr (after Finanzamt issues it)
+ *   - PBefG-Konzessionsnummer (after Landratsamt Esslingen issues it)
+ *
+ * IMPORTANT: this file is the canonical source. Do not edit the rendered
+ * pages in any other place (e.g. database directly, or Blade templates) —
+ * always update here and re-seed.
  */
 class PolicySeeder extends Seeder
 {
@@ -97,7 +110,7 @@ class PolicySeeder extends Seeder
     private function impressum(): string
     {
         return <<<'HTML'
-<h2>Angaben gemäß § 5 TMG</h2>
+<h2>Angaben gemäß § 5 DDG</h2>
 
 <p>
 <strong>StepNow Rides &amp; Movers e.K.</strong><br>
@@ -122,14 +135,15 @@ Registernummer: HRA 742905
 
 <h3>Umsatzsteuer-Identifikationsnummer</h3>
 <p>
-Umsatzsteuer-ID nach § 27 a Umsatzsteuergesetz:<br>
-<em>[BITTE ERGÄNZEN – wird nach Erteilung durch das Finanzamt nachgereicht]</em>
+Eine Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz wird derzeit nicht geführt.
+Sobald uns eine USt-IdNr. durch das zuständige Finanzamt erteilt wurde, wird diese hier ergänzt.
 </p>
 
 <h3>Aufsichtsbehörde / Konzession</h3>
 <p>
-Konzession für den Mietwagenverkehr nach § 2 Abs. 1 Nr. 4 PBefG:<br>
-<em>[BITTE ERGÄNZEN – Antrag beim Landratsamt Esslingen in Bearbeitung]</em>
+Konzession für den Mietwagenverkehr nach § 2 Abs. 1 Nr. 4 PBefG:
+Antrag beim Landratsamt Esslingen befindet sich in Bearbeitung. Bis zur Erteilung der Konzession
+werden keine entgeltlichen Personenbeförderungsfahrten durchgeführt.
 </p>
 
 <p>
@@ -146,13 +160,6 @@ Naeem Ahmad<br>
 Anschrift wie oben
 </p>
 
-<h3>EU-Streitschlichtung</h3>
-<p>
-Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-<a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">https://ec.europa.eu/consumers/odr/</a><br>
-Unsere E-Mail-Adresse finden Sie oben im Impressum.
-</p>
-
 <h3>Verbraucherstreitbeilegung / Universalschlichtungsstelle</h3>
 <p>
 Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
@@ -160,24 +167,33 @@ Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer 
 
 <h3>Haftung für Inhalte</h3>
 <p>
-Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.
-Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen
-zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.
+Nach §§ 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen
+zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung
+oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche
+Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von
+entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
 </p>
 
 <h3>Haftung für Links</h3>
 <p>
 Unser Angebot enthält ggf. Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir
 für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter
-oder Betreiber der Seiten verantwortlich.
+oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße
+überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle
+der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von
+Rechtsverletzungen werden wir derartige Links umgehend entfernen.
 </p>
 
 <h3>Urheberrecht</h3>
 <p>
 Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die
 Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der
-schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten,
+nicht kommerziellen Gebrauch gestattet.
 </p>
+
+<p><em>Stand: April 2026</em></p>
 HTML;
     }
 
@@ -212,6 +228,11 @@ E-Mail: info@step-now.de
   <li>Zahlungsdaten (nur soweit zur Abwicklung erforderlich)</li>
   <li>Technische Daten beim Besuch der Website: IP-Adresse, Browser, Referrer-URL, Zugriffszeitpunkt</li>
 </ul>
+<p>
+Konkret werden bei Nutzung des Buchungs- bzw. Kontaktformulars folgende Pflichtangaben verarbeitet: Name, E-Mail,
+Telefonnummer, Abhol- und Zieladresse sowie Datum/Uhrzeit. Rechtsgrundlage ist die Vertragsanbahnung bzw. -durchführung
+gemäß Art. 6 Abs. 1 lit. b DSGVO.
+</p>
 
 <h3>3. Zwecke und Rechtsgrundlage der Verarbeitung</h3>
 <ul>
@@ -224,7 +245,18 @@ E-Mail: info@step-now.de
 <h3>4. Empfänger der Daten</h3>
 <p>
 Ihre Daten werden ausschließlich an Personen oder Stellen weitergegeben, die zur Durchführung der Leistung erforderlich sind
-(insb. der ausführende Fahrer). Eine Übermittlung in Drittländer außerhalb der EU findet nicht statt.
+(insb. der ausführende Fahrer). Eine Übermittlung in Drittländer außerhalb der EU findet ausschließlich im Rahmen der unter
+Punkt 4a beschriebenen technischen Bereitstellung der Website statt.
+</p>
+
+<h3>4a. Content Delivery Network (Cloudflare)</h3>
+<p>
+Zur sicheren und performanten Auslieferung dieser Webseite setzen wir den Dienst Cloudflare
+(Cloudflare Inc., 101 Townsend St, San Francisco, CA 94107, USA) ein. Cloudflare verarbeitet hierbei
+insbesondere IP-Adressen, Browser-Informationen und HTTP-Header. Rechtsgrundlage ist Art. 6 Abs. 1
+lit. f DSGVO (berechtigtes Interesse an einer sicheren und schnellen Bereitstellung des Webangebots
+sowie an der Abwehr von DDoS-Angriffen). Cloudflare ist nach dem EU-US Data Privacy Framework
+zertifiziert; ergänzend bestehen Standardvertragsklauseln nach Art. 46 Abs. 2 lit. c DSGVO.
 </p>
 
 <h3>5. Speicherdauer</h3>
@@ -257,6 +289,8 @@ Telefon: +49 711 615541-0 · E-Mail: poststelle@lfdi.bwl.de
 <p>
 Für alle Anfragen zum Datenschutz erreichen Sie uns unter: <strong>info@step-now.de</strong>.
 </p>
+
+<p><em>Stand: April 2026</em></p>
 HTML;
     }
 
@@ -341,7 +375,7 @@ HTML;
 
 <p>
 Diese Website verwendet Cookies und vergleichbare Technologien. Die Nutzung nicht technisch notwendiger
-Cookies erfolgt gemäß § 25 Abs. 1 TTDSG und Art. 6 Abs. 1 lit. a DSGVO nur mit Ihrer Einwilligung.
+Cookies erfolgt gemäß § 25 Abs. 1 TDDDG und Art. 6 Abs. 1 lit. a DSGVO nur mit Ihrer Einwilligung.
 </p>
 
 <h3>1. Was sind Cookies?</h3>
@@ -353,7 +387,7 @@ ermöglichen es, Ihren Browser bei einem erneuten Besuch wiederzuerkennen.
 <h3>2. Welche Cookies verwenden wir?</h3>
 <ul>
   <li>
-    <strong>Technisch notwendige Cookies</strong> (Rechtsgrundlage: § 25 Abs. 2 Nr. 2 TTDSG):
+    <strong>Technisch notwendige Cookies</strong> (Rechtsgrundlage: § 25 Abs. 2 Nr. 2 TDDDG):
     erforderlich für den Betrieb der Website (z. B. Session-Cookie, CSRF-Schutz, Cookie-Einwilligung).
   </li>
   <li>
@@ -368,16 +402,19 @@ ermöglichen es, Ihren Browser bei einem erneuten Besuch wiederzuerkennen.
 
 <h3>3. Einwilligung verwalten</h3>
 <p>
-Sie können Ihre Cookie-Einstellungen jederzeit anpassen oder widerrufen, indem Sie den Cookie-Banner neu
-öffnen oder Cookies direkt in Ihrem Browser löschen. Ein Widerruf der Einwilligung berührt die
-Rechtmäßigkeit der bis dahin erfolgten Verarbeitung nicht.
+Sie können Ihre Cookie-Einstellungen jederzeit anpassen oder widerrufen, indem Sie den Cookie-Banner über
+den Link „Cookie-Einstellungen“ im Footer erneut öffnen oder Cookies direkt in Ihrem Browser löschen.
+Ein Widerruf der Einwilligung berührt die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung nicht.
 </p>
 
 <h3>4. Speicherdauer</h3>
 <p>
 Session-Cookies werden mit Beendigung Ihrer Browsersitzung automatisch gelöscht. Persistente Cookies
-haben eine Lebensdauer von maximal 12 Monaten, sofern nichts anderes angegeben ist.
+haben eine Lebensdauer von maximal 12 Monaten, sofern nichts anderes angegeben ist. Die Einwilligung
+selbst wird gemäß DSK-Empfehlung 13 Monate gespeichert.
 </p>
+
+<p><em>Stand: April 2026</em></p>
 HTML;
     }
 
@@ -388,60 +425,48 @@ HTML;
 
 <p>
 Verbrauchern steht nach § 312g BGB ein Widerrufsrecht bei außerhalb von Geschäftsräumen geschlossenen Verträgen
-und bei Fernabsatzverträgen grundsätzlich zu.
+und bei Fernabsatzverträgen grundsätzlich zu. Verbraucher ist jede natürliche Person, die ein Rechtsgeschäft zu
+Zwecken abschließt, die überwiegend weder ihrer gewerblichen noch ihrer selbständigen beruflichen Tätigkeit
+zugerechnet werden können.
 </p>
 
-<h3>Ausnahme für Personenbeförderung</h3>
+<h3>Widerrufsrecht</h3>
 <p>
-<strong>Hinweis:</strong> Nach § 312 Abs. 2 Nr. 5 BGB besteht <strong>kein Widerrufsrecht</strong> bei Verträgen zur
-Erbringung von Dienstleistungen im Zusammenhang mit <strong>Personenbeförderung</strong> zu einem bestimmten Termin
-oder in einem bestimmten Zeitraum. Für Mietwagenfahrten mit festem Termin gilt daher ausschließlich unsere
-Stornoregelung nach § 5 der AGB.
+Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die
+Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsabschlusses.
 </p>
 
-<h3>Widerrufsrecht für Paketdienstleistungen</h3>
 <p>
-Für Paketdienstleistungen, die nicht zu einem bestimmten Termin erbracht werden müssen, gilt das gesetzliche
-Widerrufsrecht. Sie haben das Recht, binnen 14 Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen.
+Um Ihr Widerrufsrecht auszuüben, müssen Sie uns
 </p>
-
-<h4>Folgen des Widerrufs</h4>
 <p>
-Wenn Sie diesen Vertrag widerrufen, haben wir Ihnen alle Zahlungen, die wir von Ihnen erhalten haben, unverzüglich
-und spätestens binnen 14 Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über Ihren Widerruf dieses
-Vertrages bei uns eingegangen ist. Haben Sie verlangt, dass die Dienstleistung während der Widerrufsfrist beginnen
-soll, schulden Sie uns einen angemessenen Betrag für die bis zum Widerruf bereits erbrachte Leistung.
-</p>
-
-<h3>Widerruf per E-Mail</h3>
-<p>
-Um Ihr Widerrufsrecht auszuüben, genügt eine eindeutige Erklärung per E-Mail an
-<a href="mailto:info@step-now.de">info@step-now.de</a> oder per Brief an die im Impressum genannte Adresse.
-</p>
-
-<h3>Muster-Widerrufsformular</h3>
-<p>
-Sie können das folgende Muster-Formular verwenden (nicht verpflichtend):
-</p>
-<pre style="white-space: pre-wrap; font-family: monospace; background: #f7f7f7; padding: 1em; border-radius: 4px;">
-An: StepNow Rides &amp; Movers e.K., Blumenstraße 8, 73779 Deizisau
+<strong>StepNow Rides &amp; Movers e.K.</strong><br>
+Blumenstraße 8, 73779 Deizisau<br>
+Telefon: +49 159 01228856<br>
 E-Mail: info@step-now.de
+</p>
+<p>
+mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter Brief oder E-Mail) über Ihren
+Entschluss, diesen Vertrag zu widerrufen, informieren.
+</p>
 
-Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag
-über die Erbringung der folgenden Dienstleistung:
+<h3>Folgen des Widerrufs</h3>
+<p>
+Wenn Sie diesen Vertrag widerrufen, haben wir Ihnen alle Zahlungen, die wir von Ihnen erhalten haben,
+unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über
+Ihren Widerruf dieses Vertrags bei uns eingegangen ist. Für diese Rückzahlung verwenden wir dasselbe
+Zahlungsmittel, das Sie bei der ursprünglichen Transaktion eingesetzt haben, es sei denn, mit Ihnen
+wurde ausdrücklich etwas anderes vereinbart.
+</p>
 
-________________________________________________________________
-Bestellt am / erhalten am:
-________________________________________________________________
-Name des/der Verbraucher(s):
-________________________________________________________________
-Anschrift des/der Verbraucher(s):
-________________________________________________________________
-Datum, Unterschrift (nur bei Mitteilung auf Papier)
-________________________________________________________________
+<h3>Erlöschen des Widerrufsrechts bei Beförderungsverträgen</h3>
+<p>
+Das Widerrufsrecht besteht nach § 312g Abs. 2 Nr. 9 BGB nicht bei Verträgen zur Erbringung von
+Dienstleistungen im Zusammenhang mit Beförderung von Personen, wenn der Vertrag für die Erbringung
+einen spezifischen Termin oder Zeitraum vorsieht.
+</p>
 
-(*) Unzutreffendes streichen.
-</pre>
+<p><em>Stand: April 2026</em></p>
 HTML;
     }
 }
