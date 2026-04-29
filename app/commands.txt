@@ -1,189 +1,139 @@
 # =============================================================================
-# step-now.de — deployment & maintenance commands
+#  step-now.de on Laragon (Windows) — full local setup
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# 1. FIRST-TIME SETUP (fresh clone or fresh server)
+# 1. PUT THE PROJECT IN THE LARAGON WWW FOLDER
+# -----------------------------------------------------------------------------
+# Laragon auto-creates a *.test domain for every folder under D:\laragon\www\
+# So the folder name MATTERS — name it "step-now" and you get http://step-now.test
+
+cd D:\laragon\www
+git clone <repo-url> step-now
+cd step-now
+
+
+# -----------------------------------------------------------------------------
+# 2. CREATE THE DATABASE (this is what fixes the Connection.php:825 error)
+# -----------------------------------------------------------------------------
+# Open Laragon → click "Database" button → it opens HeidiSQL
+# In HeidiSQL run:
+
+CREATE DATABASE stepnow_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# OR from Laragon Terminal:
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS stepnow_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+
+# -----------------------------------------------------------------------------
+# 3. .env CONFIG FOR LARAGON
+# -----------------------------------------------------------------------------
+# Open .env and set these values (key changes for Laragon shown below):
+
+APP_URL=http://step-now.test          # NOT localhost — Laragon serves it here
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=stepnow_db
+DB_USERNAME=root
+DB_PASSWORD=                          # Laragon's MySQL has empty root password
+
+# Mailpit — way better than MAIL_MAILER=log for testing the DOI flow
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="info@step-now.de"
+MAIL_FROM_NAME="StepNow Rides"
+
+
+# -----------------------------------------------------------------------------
+# 4. INSTALL DEPENDENCIES (Laragon Terminal — opens in project folder)
 # -----------------------------------------------------------------------------
 
-git clone <repo-url> step-now-de
-cd step-now-de
-
-composer install --no-dev --optimize-autoloader
+composer install
 npm install
 npm run build
 
-cp .env.example .env
-php artisan key:generate --force
-
+php artisan key:generate
 php artisan storage:link
 
-# Set folder permissions (Linux/macOS)
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
+
+# -----------------------------------------------------------------------------
+# 5. RUN MIGRATIONS + SEED
+# -----------------------------------------------------------------------------
+
+php artisan migrate
+php artisan db:seed
 
 
 # -----------------------------------------------------------------------------
-# 2. DATABASE — first install (creates schema + seeds all tables)
+# 6. RELOAD LARAGON SO IT REGISTERS step-now.test
+# -----------------------------------------------------------------------------
+# In the Laragon window: click "Reload" (top right, next to port 80)
+# OR right-click Laragon system tray → Apache → Reload
+
+
+# -----------------------------------------------------------------------------
+# 7. OPEN THE SITE
+# -----------------------------------------------------------------------------
+# Front:    http://step-now.test
+# Login:    http://step-now.test/login
+# Mailpit:  http://localhost:8025      (see DOI confirmation mails arrive here)
+
+
+# -----------------------------------------------------------------------------
+# 8. AFTER PULLING NEW PATCHES (PolicySeeder etc. updates)
 # -----------------------------------------------------------------------------
 
-php artisan migrate --force
-php artisan db:seed --force
-
-
-# -----------------------------------------------------------------------------
-# 3. APPLY THE COMPLIANCE PATCHES (after unzipping patches/ into project root)
-# -----------------------------------------------------------------------------
-
-# Run the new migration (adds DOI columns to newsletters table)
-php artisan migrate --force
-
-# Re-seed ONLY the legally controlled tables — single source of truth
+php artisan migrate
 php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
 php artisan db:seed --class=Database\\Seeders\\SettingsTableSeeder --force
-
-# Clear and rebuild caches
-php artisan config:clear
+php artisan view:clear
 php artisan route:clear
-php artisan view:clear
-php artisan cache:clear
+php artisan config:clear
 
 
 # -----------------------------------------------------------------------------
-# 4. UPDATE LEGAL TEXT (Impressum, Datenschutz, AGB, Widerruf, Cookies)
+# 9. DESTRUCTIVE FULL RESET (local only, drops everything)
 # -----------------------------------------------------------------------------
-# Edit database/seeders/PolicySeeder.php, then:
-
-php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
-php artisan view:clear
-
-
-# -----------------------------------------------------------------------------
-# 5. UPDATE BUSINESS DATA (phone, email, address, social links)
-# -----------------------------------------------------------------------------
-# Either edit via admin UI at /setting, OR edit SettingsTableSeeder.php and:
-
-php artisan db:seed --class=Database\\Seeders\\SettingsTableSeeder --force
-php artisan view:clear
-
-
-# -----------------------------------------------------------------------------
-# 6. FULL DATABASE REFRESH — DESTRUCTIVE, drops everything
-# -----------------------------------------------------------------------------
-# Use this in local dev only. NEVER on production.
 
 php artisan migrate:fresh --seed
 
 
 # -----------------------------------------------------------------------------
-# 7. RUN INDIVIDUAL SEEDERS
+# 10. TEST THE NEWSLETTER DOUBLE-OPT-IN FLOW
 # -----------------------------------------------------------------------------
+# 1. Open http://step-now.test
+# 2. Sign up to the newsletter with any email + tick the consent box
+# 3. Open http://localhost:8025  (Mailpit web UI)
+# 4. Click the confirmation link in the mail
+# 5. Verify the row in DB:
 
-php artisan db:seed --class=Database\\Seeders\\SettingsTableSeeder --force
-php artisan db:seed --class=Database\\Seeders\\UserSeeder --force
-php artisan db:seed --class=Database\\Seeders\\SliderSeeder --force
-php artisan db:seed --class=Database\\Seeders\\InfoBlockSeeder --force
-php artisan db:seed --class=Database\\Seeders\\WhyChooseUsSectionSeeder --force
-php artisan db:seed --class=Database\\Seeders\\TestimonialSectionSeeder --force
-php artisan db:seed --class=Database\\Seeders\\PackageCategorySeeder --force
-php artisan db:seed --class=Database\\Seeders\\PackageSeeder --force
-php artisan db:seed --class=Database\\Seeders\\FaqSeeder --force
-php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
+mysql -u root -e "USE stepnow_db; SELECT email, confirmed_at FROM newsletters;"
 
 
 # -----------------------------------------------------------------------------
-# 8. ROLLBACK THE LAST MIGRATION
+# 11. IF YOU STILL HIT THE Connection.php:825 ERROR
 # -----------------------------------------------------------------------------
+# Run these checks in the Laragon Terminal:
 
-php artisan migrate:rollback --step=1
+# (a) Is MySQL actually up?
+mysql -u root -e "SELECT VERSION();"
+# Expected: 8.4.3
 
+# (b) Does the database exist?
+mysql -u root -e "SHOW DATABASES LIKE 'stepnow_db';"
+# Expected: one row
 
-# -----------------------------------------------------------------------------
-# 9. LOCAL DEVELOPMENT — start the site
-# -----------------------------------------------------------------------------
-
-php artisan serve
-# Site at http://localhost:8000
-
-# In a second terminal (for hot-reloading frontend assets):
-npm run dev
-
-
-# -----------------------------------------------------------------------------
-# 10. PRODUCTION DEPLOYMENT — every time you push new code
-# -----------------------------------------------------------------------------
-
-git pull origin main
-
-composer install --no-dev --optimize-autoloader
-npm ci
-npm run build
-
-php artisan migrate --force
-
-# Re-seed ONLY if PolicySeeder or SettingsTableSeeder changed
-php artisan db:seed --class=Database\\Seeders\\PolicySeeder --force
-php artisan db:seed --class=Database\\Seeders\\SettingsTableSeeder --force
-
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# Restart the queue worker if you use one
-php artisan queue:restart
-
-
-# -----------------------------------------------------------------------------
-# 11. SELF-HOSTED VENDOR ASSETS (one-time on the deployment server)
-# -----------------------------------------------------------------------------
-# Replaces jsDelivr / cdnjs CDN dependencies with local copies.
-
-mkdir -p public/front/assets/css/vendor/fonts public/front/assets/js/vendor
-
-curl -sSL https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css \
-    -o public/front/assets/css/vendor/bootstrap-icons.min.css
-curl -sSL https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff2 \
-    -o public/front/assets/css/vendor/fonts/bootstrap-icons.woff2
-curl -sSL https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff \
-    -o public/front/assets/css/vendor/fonts/bootstrap-icons.woff
-curl -sSL https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css \
-    -o public/front/assets/css/vendor/notyf.min.css
-curl -sSL https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js \
-    -o public/front/assets/js/vendor/notyf.min.js
-
-
-# -----------------------------------------------------------------------------
-# 12. VERIFY COMPLIANCE — no leaks to third-party CDNs
-# -----------------------------------------------------------------------------
-
-grep -RIn "jsdelivr.net\|fonts.googleapis\|fonts.gstatic\|cdnjs.cloudflare" resources/views/front/ public/
-# Expected: zero matches
-
-grep -RIn "TMG\|TTDSG" database/seeders/PolicySeeder.php
-# Expected: only matches inside comments (documentation)
-
-grep -RIn "ec.europa.eu/consumers/odr" database/seeders/PolicySeeder.php
-# Expected: zero matches
-
-
-# -----------------------------------------------------------------------------
-# 13. TROUBLESHOOTING
-# -----------------------------------------------------------------------------
-
-# View live error log
-tail -f storage/logs/laravel.log
-
-# Check current routes
-php artisan route:list
-
-# Confirm policy rows are in the DB
+# (c) Does Laravel see the .env?
+php artisan config:clear
 php artisan tinker
->>> DB::table('policies')->pluck('title');
+>>> config('database.connections.mysql')
+>>> exit
+# The DB host/name printed must match what you set in .env
 
-# Test a route directly
-curl -sI https://step-now.de/impressum | head -1
-# Expected: HTTP/2 200
-
-# Force-clear the bytecode cache (rare — only after composer.json changes)
-composer dump-autoload -o
-php artisan optimize:clear
+# (d) MySQL 8.4 auth issue — if Laravel says "auth plugin caching_sha2_password":
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';"
+mysql -u root -e "FLUSH PRIVILEGES;"

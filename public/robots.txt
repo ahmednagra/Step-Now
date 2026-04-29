@@ -1,2 +1,33 @@
 User-agent: *
-Disallow:
+
+# Block admin & auth surfaces from search-engine indexing.
+Disallow: /login
+Disallow: /register
+Disallow: /password
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /confirm-password
+Disallow: /verify-email
+Disallow: /admin
+Disallow: /admin-dashboard
+Disallow: /admin-notification
+Disallow: /admin-notify
+Disallow: /admin-mark-as-read
+Disallow: /admin-all-read
+Disallow: /user-dashboard
+Disallow: /pendingUsers
+Disallow: /approvedUsers
+Disallow: /blockedUsers
+
+# Block uploads / runtime asset paths from indexing.
+Disallow: /storage/
+Disallow: /assets/admin/
+
+# Public legal pages — explicitly allowed
+Allow: /impressum
+Allow: /datenschutz
+Allow: /agb
+Allow: /widerrufsbelehrung
+Allow: /cookie-richtlinie
+
+Sitemap: https://step-now.de/sitemap.xml
