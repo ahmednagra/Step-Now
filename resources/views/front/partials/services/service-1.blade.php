@@ -3,13 +3,10 @@
     <div class="container">
         <div class="section-title text-center sec-title-animation animation-style1">
             <div class="section-title__tagline-box justify-content-center">
-                {{-- <div class="section-title__tagline-shape">
-                    <img src="{{ asset('front/assets/images/shapes/section-title-tagline-shape-1.png') }}" alt="">
-                </div> --}}
-                <span class="section-title__tagline">Was wir anbieten</span>
+                <span class="section-title__tagline">{{ __('What We Offer') }}</span>
             </div>
             <h2 class="section-title__title title-animation">
-                Dienstleistungen, die wir unseren Kunden anbieten
+                {{ __('Services we provide to our customers') }}
             </h2>
         </div>
         <div class="row">
@@ -25,10 +22,14 @@
                         <div class="services-one__icon">
                             <img src="{{ asset($service->icon) }}" alt="Icon" width="50">
                         </div>
-                        <h3 class="services-one__title"><a
-                                href="{{ route('front.service.detail', $service->slug) }}">{{ $service->name }}</a>
+                        <h3 class="services-one__title">
+                            <a href="{{ route('front.service.detail', $service->slug) }}">
+                                {{ tr($service, 'name') ?? $service->name }}
+                            </a>
                         </h3>
-                        <p class="services-one__text">{!! $service->short_description !!}</p>
+                        <p class="services-one__text">
+                            {!! tr($service, 'short_description') ?? $service->short_description !!}
+                        </p>
                     </div>
                 </div>
             @endforeach
