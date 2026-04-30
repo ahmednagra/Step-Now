@@ -21,21 +21,12 @@
             </ul>
             <div class="main-menu__top-right">
 
-                {{-- ====================================================================
-                     Language switcher: clean direct-toggle URLs.
-                     Each link points to the SAME current page, with ?lang=de or ?lang=en.
-                     The SetLocale middleware reads ?lang= and persists it to session,
-                     so subsequent navigation needs no URL parameter.
-                     No redirect chain, no /locale/en URL, no return parameter.
-                     ==================================================================== --}}
+                {{-- Language switcher: clean direct-toggle URLs --}}
                 @php
                     $currentLocale = app()->getLocale();
-
-                    // Strip any existing ?lang= or &lang= from the current URL,
-                    // then build clean DE and EN versions of the same page.
                     $currentPath = request()->path() === '/' ? '/' : '/' . request()->path();
                     $existingQuery = request()->query();
-                    unset($existingQuery['lang']); // remove any old lang param
+                    unset($existingQuery['lang']);
 
                     $deUrl = url($currentPath) . (!empty($existingQuery) ? '?' . http_build_query(array_merge($existingQuery, ['lang' => 'de'])) : '?lang=de');
                     $enUrl = url($currentPath) . (!empty($existingQuery) ? '?' . http_build_query(array_merge($existingQuery, ['lang' => 'en'])) : '?lang=en');
@@ -43,17 +34,15 @@
                 <div class="main-menu__lang-switcher" style="display:inline-flex; gap:6px; align-items:center; margin-right:18px; font-size:.85rem;">
                     <a href="{{ $deUrl }}"
                        style="color:{{ $currentLocale === 'de' ? '#ffc107' : '#fff' }}; text-decoration:{{ $currentLocale === 'de' ? 'underline' : 'none' }}; font-weight:{{ $currentLocale === 'de' ? '700' : '400' }};"
-                       aria-label="Deutsch"
-                       title="Deutsch">DE</a>
+                       aria-label="Deutsch" title="Deutsch">DE</a>
                     <span style="opacity:.5; color:#fff;">|</span>
                     <a href="{{ $enUrl }}"
                        style="color:{{ $currentLocale === 'en' ? '#ffc107' : '#fff' }}; text-decoration:{{ $currentLocale === 'en' ? 'underline' : 'none' }}; font-weight:{{ $currentLocale === 'en' ? '700' : '400' }};"
-                       aria-label="English"
-                       title="English">EN</a>
+                       aria-label="English" title="English">EN</a>
                 </div>
 
                 <div class="main-menu__top-login-reg-box">
-                    <a href="{{ route('login') }}">{{ __('Sign in') }}</a>
+                    <a href="{{ lroute('login') }}">{{ __('Sign in') }}</a>
                 </div>
                 <div class="main-menu__social">
                     @if (!empty($setting->fb_link))
@@ -76,15 +65,13 @@
         </div>
     </div>
 
-    {{-- ============================================================
-         MAIN NAVIGATION — logo + menu items
-         ============================================================ --}}
+    {{-- MAIN NAVIGATION — uses lroute() so menu items keep ?lang=en --}}
     <nav class="main-menu">
         <div class="main-menu__wrapper">
             <div class="main-menu__wrapper-inner">
                 <div class="main-menu__left">
                     <div class="main-menu__logo">
-                        <a href="{{ route('front.index') }}">
+                        <a href="{{ lroute('front.index') }}">
                             <img src="{{ asset($setting->logo) }}" width="200px" alt="StepNow">
                         </a>
                     </div>
@@ -93,11 +80,11 @@
                     <div class="main-menu__main-menu-box">
                         <a href="#" class="mobile-nav__toggler" aria-label="Menu"><i class="fa fa-bars"></i></a>
                         <ul class="main-menu__list">
-                            <li><a href="{{ route('front.index') }}">{{ __('Home') }}</a></li>
-                            <li><a href="{{ route('front.about') }}">{{ __('About Us') }}</a></li>
-                            <li><a href="{{ route('front.services') }}">{{ __('Services') }}</a></li>
-                            <li><a href="{{ route('front.pricing') }}">{{ __('Pricing') }}</a></li>
-                            <li><a href="{{ route('front.contactus') }}">{{ __('Contact') }}</a></li>
+                            <li><a href="{{ lroute('front.index') }}">{{ __('Home') }}</a></li>
+                            <li><a href="{{ lroute('front.about') }}">{{ __('About Us') }}</a></li>
+                            <li><a href="{{ lroute('front.services') }}">{{ __('Services') }}</a></li>
+                            <li><a href="{{ lroute('front.pricing') }}">{{ __('Pricing') }}</a></li>
+                            <li><a href="{{ lroute('front.contactus') }}">{{ __('Contact') }}</a></li>
                         </ul>
                     </div>
                 </div>

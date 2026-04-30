@@ -10,7 +10,7 @@
                     <div class="col-xl-3 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="100ms">
                         <div class="footer-widget__about">
                             <div class="footer-widget__about-logo">
-                                <a href="{{ route('front.index') }}">
+                                <a href="{{ lroute('front.index') }}">
                                     <img src="{{ asset($setting->footer_logo) }}" width="150" alt="StepNow Rides Logo">
                                 </a>
                             </div>
@@ -44,10 +44,10 @@
                         <div class="footer-widget__links">
                             <h4 class="footer-widget__title">{{ __('Quick Links') }}</h4>
                             <ul class="footer-widget__links-list list-unstyled">
-                                <li><a href="{{ route('front.about') }}">{{ __('About us') }}</a></li>
-                                <li><a href="{{ route('front.services') }}">{{ __('Our Services') }}</a></li>
-                                <li><a href="{{ route('front.pricing') }}">{{ __('Pricing') }}</a></li>
-                                <li><a href="{{ route('front.contactus') }}">{{ __('Contact') }}</a></li>
+                                <li><a href="{{ lroute('front.about') }}">{{ __('About us') }}</a></li>
+                                <li><a href="{{ lroute('front.services') }}">{{ __('Our Services') }}</a></li>
+                                <li><a href="{{ lroute('front.pricing') }}">{{ __('Pricing') }}</a></li>
+                                <li><a href="{{ lroute('front.contactus') }}">{{ __('Contact') }}</a></li>
                             </ul>
                         </div>
                     </div>
@@ -58,19 +58,19 @@
                             <h4 class="footer-widget__title">{{ __('Legal') }}</h4>
                             <ul class="footer-widget__links-list list-unstyled">
                                 @if(isset($policies) && $policies->has('Impressum'))
-                                    <li><a href="{{ route('front.impressum') }}">{{ __('Imprint') }}</a></li>
+                                    <li><a href="{{ lroute('front.impressum') }}">{{ __('Imprint') }}</a></li>
                                 @endif
                                 @if(isset($policies) && $policies->has('Datenschutzerklärung'))
-                                    <li><a href="{{ route('front.datenschutz') }}">{{ __('Privacy Policy') }}</a></li>
+                                    <li><a href="{{ lroute('front.datenschutz') }}">{{ __('Privacy Policy') }}</a></li>
                                 @endif
                                 @if(isset($policies) && $policies->has('Allgemeine Geschäftsbedingungen'))
-                                    <li><a href="{{ route('front.agb') }}">{{ __('Terms & Conditions') }}</a></li>
+                                    <li><a href="{{ lroute('front.agb') }}">{{ __('Terms & Conditions') }}</a></li>
                                 @endif
                                 @if(isset($policies) && $policies->has('Widerrufsbelehrung'))
-                                    <li><a href="{{ route('front.widerruf') }}">{{ __('Right of Withdrawal') }}</a></li>
+                                    <li><a href="{{ lroute('front.widerruf') }}">{{ __('Right of Withdrawal') }}</a></li>
                                 @endif
                                 @if(isset($policies) && $policies->has('Cookie-Richtlinie'))
-                                    <li><a href="{{ route('front.cookies') }}">{{ __('Cookie Policy') }}</a></li>
+                                    <li><a href="{{ lroute('front.cookies') }}">{{ __('Cookie Policy') }}</a></li>
                                 @endif
                                 <li>
                                     <a href="#" onclick="event.preventDefault(); if(window.stepnowConsent){window.stepnowConsent.openSettings();}">

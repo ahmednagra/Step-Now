@@ -31,6 +31,7 @@
     },
     "files": [
         "app/Helpers/Helper.php",
+        "app/Helpers/LocaleUrlHelper.php",
         "app/Helpers/LanguageHelpers.php",
         "app/Helpers/I18nHelper.php"
     ]
