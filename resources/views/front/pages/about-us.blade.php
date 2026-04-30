@@ -1,5 +1,5 @@
 @extends('front.layouts.master')
-@section('title', 'About Us')
+@section('title', __('About Us'))
 @section('css')
 
     <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/page-header.css') }}" />
@@ -17,16 +17,15 @@
             style="background-image: url({{ asset('front/assets/images/shapes/page-header-shape-1.png') }});"></div>
         <div class="container">
             <div class="page-header__inner">
-            <h3>Über uns</h3>
-            <div class="thm-breadcrumb__inner">
-                <ul class="thm-breadcrumb list-unstyled">
-                    <li><a href="{{ route('front.index') }}">Startseite</a></li>
-                    <li><span class="icon-arrow-left"></span></li>
-                    <li>Über uns</li>
-                </ul>
+                <h3>{{ __('About Us') }}</h3>
+                <div class="thm-breadcrumb__inner">
+                    <ul class="thm-breadcrumb list-unstyled">
+                        <li><a href="{{ route('front.index') }}">{{ __('Home') }}</a></li>
+                        <li><span class="icon-arrow-left"></span></li>
+                        <li>{{ __('About Us') }}</li>
+                    </ul>
+                </div>
             </div>
-        </div>
-
         </div>
     </section>
 
