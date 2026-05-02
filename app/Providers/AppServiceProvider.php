@@ -11,38 +11,23 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         // No bindings.
     }
 
-    /**
-     * Bootstrap any application services.
-     *
-     * View-shared values:
-     *   $setting   — the single Settings row (logo, phone, email, address …)
-     *   $policies  — array of active policy rows keyed by title slug,
-     *                used by the footer to render the legally required
-     *                "Rechtliches" navigation block.
-     *   $banners   — collection of currently-enabled site banners (soft-launch,
-     *                safety notices, etc.) — rendered above the header.
-     *
-     * All three are read once per request from the database so seeders remain
-     * the single source of truth. The Schema::hasTable() guards mean the
-     * site still boots before the migrations have been run for the first time.
-     */
     public function boot(): void
     {
-        // Share settings (logo, phones, socials)
+        /* ----------------------------------------------------------------
+         | Settings (logo, phones, socials)
+         ---------------------------------------------------------------- */
         if (Schema::hasTable('settings')) {
             View::share('setting', Setting::first());
         }
 
-        // Share active legal policies for the footer "Rechtliches" block.
-        // Indexed by canonical title so views can do $policies->has('Impressum').
+        /* ----------------------------------------------------------------
+         | Active legal policies (footer "Rechtliches" block)
+         ---------------------------------------------------------------- */
         if (Schema::hasTable('policies')) {
             $policies = DB::table('policies')
                 ->where('status', 'active')
@@ -52,12 +37,43 @@ class AppServiceProvider extends ServiceProvider
             View::share('policies', $policies);
         }
 
-        // Share currently-enabled banners. Empty collection if the table
-        // doesn't exist yet — the Blade partial guards against that.
+        /* ----------------------------------------------------------------
+         | Active site banners (soft-launch / safety notices)
+         ---------------------------------------------------------------- */
         if (Schema::hasTable('site_banners')) {
             View::share('banners', SiteBanner::enabled()->get());
         } else {
             View::share('banners', collect());
         }
+
+        $pending = ['bookings' => 0, 'enquiries' => 0];
+
+        try {
+            if (auth()->check()) {
+
+                if (Schema::hasTable('bookings')) {
+                    $pending['bookings'] = (int) DB::table('bookings')
+                        ->whereNull('deleted_at')
+                        ->where('status', 'pending')
+                        ->count();
+                }
+
+                if (Schema::hasTable('enquiries')) {
+                    $eQuery = DB::table('enquiries')->whereNull('deleted_at');
+
+                    if (Schema::hasColumn('enquiries', 'is_read')) {
+                        $eQuery->where(function ($q) {
+                            $q->where('is_read', 0)->orWhereNull('is_read');
+                        });
+                    }
+                    $pending['enquiries'] = (int) $eQuery->count();
+                }
+            }
+        } catch (\Throwable $e) {
+            // Silent — sidebar fallback ?? 0 will display 0 badges.
+            // Don't let a missing column or driver hiccup 500 every page.
+        }
+
+        View::share('pending', $pending);
     }
 }

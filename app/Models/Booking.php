@@ -18,6 +18,7 @@ class Booking extends Model
         'email',
         'phone',
         'pickup',
+        'destination',
         'booking_date',
         'booking_time',
         'no_of_people',
@@ -27,4 +28,8 @@ class Booking extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    protected $casts = [
+        'booking_date' => 'date',
+    ];
 }

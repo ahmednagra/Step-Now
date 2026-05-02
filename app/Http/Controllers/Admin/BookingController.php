@@ -6,18 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 
-/**
- * Admin Booking Controller (Wave 4 — minor revision).
- *
- * Changes:
- *   - index() now respects ?status=… query param so the dashboard
- *     pipeline links land you on a pre-filtered list.
- *   - Bookings are ordered newest first by default (was: insertion order).
- *   - All() retained for backwards compat with the existing index view,
- *     which does its own client-side filter once the rows are in the DOM.
- *     For DBs with thousands of rows, switch to ->paginate(50) below
- *     and add Bootstrap pagination markup at the bottom of the index view.
- */
 class BookingController extends Controller
 {
     public function index(Request $request)
@@ -32,6 +20,12 @@ class BookingController extends Controller
         $bookings = $query->get();
 
         return view('admin.booking.index', compact('bookings'));
+    }
+
+    public function detail($id)
+    {
+        $booking = Booking::findOrFail($id);
+        return view('admin.booking.detail', compact('booking'));
     }
 
     public function add()
