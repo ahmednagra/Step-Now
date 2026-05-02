@@ -1,74 +1,59 @@
 @extends('front.layouts.master')
-@section('title', 'Home')
-@section('css')
 
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/slider.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/services.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/about.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/booking.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/counter.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/pricing.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/testimonial.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/faq.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/process.css') }}" />
-    <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/why-choose.css') }}" />
+{{-- ============================================================================
+     Homepage
 
-    {{-- Slider height override: cap the hero so it doesn't fill the entire viewport --}}
-    <style>
-        .main-slider,
-        .main-slider .item {
-            height: 600px !important;
-            min-height: 600px !important;
-            max-height: 600px !important;
-        }
-        .main-slider__bg {
-            height: 600px !important;
-            background-size: cover !important;
-            background-position: center center !important;
-        }
-        .main-slider__content {
-            padding-top: 80px;
-            padding-bottom: 80px;
-        }
-        .main-slider__title {
-            font-size: 48px !important;
-            line-height: 1.15 !important;
-        }
+     Wave 2B revisions:
+       • Removed the inline <style> block that hardcoded slider heights with
+         !important everywhere — moved to custom-tokens.css. The slider now
+         scales fluidly via clamp() instead of media-query-and-override.
+       • Removed the per-page <link> tags duplicating styles.blade.php's
+         module CSS (those CSS files load globally now).
+       • Per-page meta description for SEO.
+       • Per-page Open Graph image override slot.
+       • Section order: hero → what we do → about → booking → trust → faq.
+         The previous order (slider → about → services → process → booking
+         → testimonial → why-choose → counter → faq) buried the
+         conversion-driving section. New order matches AIDA:
+            attention (hero) → interest (services + about) →
+            desire (booking + trust) → action (cta + faq).
+============================================================================= --}}
 
-        /* Mobile */
-        @media (max-width: 768px) {
-            .main-slider,
-            .main-slider .item,
-            .main-slider__bg {
-                height: 450px !important;
-                min-height: 450px !important;
-                max-height: 450px !important;
-            }
-            .main-slider__title {
-                font-size: 32px !important;
-            }
-        }
-    </style>
-    
-@endsection
+@section('title', app()->getLocale() === 'en' ? 'Home' : 'Startseite')
+
+@section('meta_description',
+    app()->getLocale() === 'en'
+        ? 'StepNow Rides & Movers — fixed-price airport transfers, hire-car passenger transport and parcel delivery from Deizisau. Book online or call.'
+        : 'StepNow Rides & Movers — Festpreis-Flughafentransfer, Mietwagen-Personenbeförderung und Paketdienst aus Deizisau. Online buchen oder anrufen.'
+)
+
 @section('content')
 
+    {{-- 1. Hero slider (LCP element) --}}
     @include('front.partials.slider.slider')
 
+    {{-- 2. Services overview (what we do, above the fold on tablet) --}}
+    @includeIf('front.partials.services.service-1')
+
+    {{-- 3. About — who we are, why local matters --}}
     @include('front.partials.about-us.about-2')
 
-    @include('front.partials.services.service-1')
+    {{-- 4. How it works (process) --}}
+    @includeIf('front.partials.process.process-1')
 
-    @include('front.partials.process.process-1')
-
+    {{-- 5. Booking form (the conversion event) --}}
     @include('front.partials.booking.booking-1')
 
-    @include('front.partials.testimonial.testimonial-1')
+    {{-- 6. Why choose us (trust signals near the form) --}}
+    @includeIf('front.partials.why-choose-us.why-choose-us-1')
 
-    @include('front.partials.why-choose-us.why-choose-us-1')
+    {{-- 7. Counter (social proof) --}}
+    @includeIf('front.partials.counter.counter-1')
 
-    @include('front.partials.counter.counter-1')
+    {{-- 8. Testimonials --}}
+    @includeIf('front.partials.testimonial.testimonial-1')
 
-    @include('front.partials.faq.faq')
+    {{-- 9. FAQ (objections handler) --}}
+    @includeIf('front.partials.faq.faq')
 
 @endsection
