@@ -1,17 +1,15 @@
 {{--
     ============================================================================
-    Front header — main navigation, top contact bar, language toggle.
+    Front header — main navigation, language toggle in the nav bar.
 
-    Wave 2A revisions:
-      • Single source of truth for phone (settings → fallback +49 159 01228856)
-      • Single source of truth for email (settings → fallback info@step-now.de)
-      • Active-state on nav links via Route::is() — proper aria-current="page"
-      • Language toggle uses .sn-lang-toggle (styled in custom-tokens.css)
-      • [data-sn-lang] attribute → JS handler in scripts.blade.php writes
-        the locale cookie. No more inline styles on the switcher.
-      • Phone link uses E.164 format for tel: href, display format for label
-      • Logo width as HTML attribute kept for LCP (browser allocates space)
-      • Removed inline style="..." everywhere — class-driven now
+    Wave 5g revisions:
+      • Removed the dark blue top contact bar (phone + email + social).
+        Phone is still shown via the right-side "Call anytime" CTA.
+        Email is shown in the footer + side-bar drawer (untouched).
+        Social icons are shown in the footer (untouched).
+      • Language toggle moved INTO the white nav bar, sitting left of
+        the "Call anytime" CTA. Same DE/EN buttons, same JS handler.
+      • Header is now ~70px shorter — homepage hero rises into view sooner.
     ============================================================================
 --}}
 @php
@@ -26,7 +24,7 @@
         ?: '+' . preg_replace('/\D+/', '', $phoneRaw);
     $emailAddr  = optional($setting ?? null)->email ?? 'info@step-now.de';
 
-    /* URLs for the language toggle (locale_url_for handles all edge cases) */
+    /* URLs for the language toggle */
     $deUrl = function_exists('locale_url_for') ? locale_url_for('de') : url(request()->path()) . '?lang=de';
     $enUrl = function_exists('locale_url_for') ? locale_url_for('en') : url(request()->path()) . '?lang=en';
 
@@ -44,82 +42,6 @@
 @endphp
 
 <header class="main-header" role="banner">
-
-    {{-- ─── TOP CONTACT BAR ──────────────────────────────────────────── --}}
-    <div class="main-menu__top">
-        <div class="main-menu__top-inner">
-
-            {{-- Left: contact details --}}
-            <ul class="list-unstyled main-menu__contact-list">
-                <li>
-                    <div class="icon" aria-hidden="true"><i class="icon-call-2"></i></div>
-                    <div class="text">
-                        <p>
-                            <a href="tel:{{ $phoneE164 }}" aria-label="{{ $isEN ? 'Call' : 'Anrufen' }} {{ $phoneRaw }}">
-                                {{ $phoneRaw }}
-                            </a>
-                        </p>
-                    </div>
-                </li>
-                <li>
-                    <div class="icon" aria-hidden="true"><i class="icon-envelope-2"></i></div>
-                    <div class="text">
-                        <p>
-                            <a href="mailto:{{ $emailAddr }}" aria-label="{{ $isEN ? 'Email' : 'E-Mail an' }} {{ $emailAddr }}">
-                                {{ $emailAddr }}
-                            </a>
-                        </p>
-                    </div>
-                </li>
-            </ul>
-
-            {{-- Right: language toggle + social --}}
-            <div class="main-menu__top-right">
-
-                {{-- Language toggle (DE/EN, equal weight) --}}
-                <div class="sn-lang-toggle"
-                     role="group"
-                     aria-label="{{ $isEN ? 'Language' : 'Sprache' }}">
-                    <a href="{{ $enUrl }}"
-                       data-sn-lang="en"
-                       class="sn-lang-toggle__btn"
-                       aria-current="{{ $isEN ? 'true' : 'false' }}"
-                       aria-label="English"
-                       hreflang="en"
-                       lang="en">EN</a>
-                    <a href="{{ $deUrl }}"
-                       data-sn-lang="de"
-                       class="sn-lang-toggle__btn"
-                       aria-current="{{ $isEN ? 'false' : 'true' }}"
-                       aria-label="Deutsch"
-                       hreflang="de"
-                       lang="de">DE</a>
-                </div>
-
-                {{-- Social icons (only render if URL is set) --}}
-                <div class="thm-social-link1">
-                    <ul class="social-box list-unstyled" role="list">
-                        @if (!empty(optional($setting ?? null)->fb_link))
-                            <li><a href="{{ $setting->fb_link }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a></li>
-                        @endif
-                        @if (!empty(optional($setting ?? null)->insta_link))
-                            <li><a href="{{ $setting->insta_link }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a></li>
-                        @endif
-                        @if (!empty(optional($setting ?? null)->yt_link))
-                            <li><a href="{{ $setting->yt_link }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a></li>
-                        @endif
-                        @if (!empty(optional($setting ?? null)->tiktok_link))
-                            <li><a href="{{ $setting->tiktok_link }}" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="bi bi-tiktok" aria-hidden="true"></i></a></li>
-                        @endif
-                        @if (!empty(optional($setting ?? null)->linkedin_link))
-                            <li><a href="{{ $setting->linkedin_link }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a></li>
-                        @endif
-                    </ul>
-                </div>
-
-            </div>
-        </div>
-    </div>
 
     {{-- ─── MAIN NAV BAR ─────────────────────────────────────────────── --}}
     <nav class="main-menu" aria-label="{{ $isEN ? 'Primary navigation' : 'Hauptnavigation' }}">
@@ -140,9 +62,7 @@
                     <div class="main-menu__main-menu-box">
                         <button type="button"
                                 class="mobile-nav__toggler"
-                                aria-label="{{ $isEN ? 'Open menu' : 'Menü öffnen' }}"
-                                aria-expanded="false"
-                                aria-controls="mobile-nav-content">
+                                aria-label="{{ $isEN ? 'Open menu' : 'Menü öffnen' }}">
                             <i class="fa fa-bars" aria-hidden="true"></i>
                         </button>
 
@@ -186,8 +106,30 @@
                     </div>
                 </div>
 
-                {{-- Right: call-anytime CTA + side-panel toggle --}}
+                {{-- Right: language toggle + call-anytime CTA + side-panel toggle --}}
                 <div class="main-menu__right">
+
+                    {{-- Language toggle (DE/EN) — moved here from old top bar --}}
+                    <div class="sn-lang-toggle sn-lang-toggle--inline"
+                         role="group"
+                         aria-label="{{ $isEN ? 'Language' : 'Sprache' }}">
+                        <a href="{{ $enUrl }}"
+                           data-sn-lang="en"
+                           class="sn-lang-toggle__btn"
+                           aria-current="{{ $isEN ? 'true' : 'false' }}"
+                           aria-label="English"
+                           hreflang="en"
+                           lang="en">EN</a>
+                        <a href="{{ $deUrl }}"
+                           data-sn-lang="de"
+                           class="sn-lang-toggle__btn"
+                           aria-current="{{ $isEN ? 'false' : 'true' }}"
+                           aria-label="Deutsch"
+                           hreflang="de"
+                           lang="de">DE</a>
+                    </div>
+
+                    {{-- Call anytime CTA --}}
                     <div class="main-menu__call">
                         <div class="main-menu__call-icon" aria-hidden="true">
                             <i class="icon-call-3"></i>
@@ -200,6 +142,7 @@
                         </div>
                     </div>
 
+                    {{-- Side-panel hamburger (opens x-side-bar) --}}
                     <a class="navSidebar-button main-menu__nav-sidebar-icon"
                        href="#"
                        role="button"
@@ -215,7 +158,7 @@
     </nav>
 </header>
 
-{{-- Sticky-on-scroll header (populated by theme JS) --}}
+{{-- Sticky-on-scroll header (populated by theme JS) — kept for theme compat --}}
 <div class="stricky-header stricked-menu main-menu" aria-hidden="true">
     <div class="sticky-header__content"></div>
 </div>

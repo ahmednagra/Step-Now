@@ -148,4 +148,48 @@
             });
         }
     });
+
+    /* ---- Wave 5h: overlay header on homepage + dismissible banner ---- */
+(function () {
+    /* Mark the body as "homepage" so CSS in stepnow-brand.css can apply the
+       overlay-header treatment ONLY on the home route. We detect homepage
+       by checking for the presence of .main-slider as the first content. */
+    var hasHero = document.querySelector('main#content > .main-slider')
+               || document.querySelector('main#content section.main-slider:first-child');
+    if (hasHero) {
+        document.body.classList.add('sn-overlay-hero');
+    }
+
+    /* Dismissible banner — adds an × button, remembers the dismiss in
+       sessionStorage so it doesn't re-appear on every page load this
+       session, but does come back on next visit (so important notices
+       still get seen). */
+    var banners = document.querySelectorAll('.sn-banner');
+    if (banners.length) {
+        // If user already dismissed this session, hide immediately
+        try {
+            if (sessionStorage.getItem('sn_banner_dismissed') === '1') {
+                document.body.classList.add('sn-banner-dismissed');
+            }
+        } catch (e) { /* sessionStorage blocked — fall through, banner stays */ }
+
+        banners.forEach(function (banner) {
+            // Avoid duplicate buttons on hot-reload
+            if (banner.querySelector('.sn-banner__dismiss')) return;
+
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sn-banner__dismiss';
+            btn.setAttribute('aria-label',
+                document.documentElement.lang === 'en' ? 'Dismiss notice' : 'Hinweis schließen');
+            btn.innerHTML = '×';
+            btn.addEventListener('click', function () {
+                document.body.classList.add('sn-banner-dismissed');
+                try { sessionStorage.setItem('sn_banner_dismissed', '1'); } catch (e) {}
+            });
+            var inner = banner.querySelector('.sn-banner__inner') || banner;
+            inner.appendChild(btn);
+        });
+    }
+})();
 </script>

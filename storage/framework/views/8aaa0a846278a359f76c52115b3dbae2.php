@@ -1,6 +1,8 @@
 
 
 <?php
+    use Illuminate\Support\HtmlString;
+
     $locale       = app()->getLocale();
     $isEN         = $locale === 'en';
     $sliders      = $sliders ?? collect();
@@ -12,6 +14,113 @@
     $playLabel    = $isEN ? 'Play carousel'  : 'Karussell abspielen';
     $prevLabel    = $isEN ? 'Previous slide' : 'Vorherige Folie';
     $nextLabel    = $isEN ? 'Next slide'     : 'Nächste Folie';
+
+    /* ------------------------------------------------------------------
+     | sn_normalise_slider_title($raw)
+     |
+     | The DB currently has rows where the title contains the LITERAL
+     | two-character sequence "\n" (backslash followed by lowercase n)
+     | instead of a real newline byte (0x0A). This happens when a seeder
+     | uses single-quoted PHP strings or when an admin pastes "\n" as
+     | text. We normalise those literal sequences to real newlines BEFORE
+     | the renderer sees them, so the smart parser below can apply its
+     | line-break rule.
+     |
+     | We deliberately do NOT try to be clever about "literal backslash
+     | + n" inside actual prose (that would be ambiguous) — we only
+     | normalise sequences that are very likely intended as line breaks
+     | in slider titles (which are short, single-purpose strings).
+     ------------------------------------------------------------------ */
+    if (!function_exists('sn_normalise_slider_title')) {
+        function sn_normalise_slider_title(string $raw): string
+        {
+            // Convert literal "\r\n", "\n", "\r" sequences (2-char strings)
+            // into real newlines. These are exactly the sequences a buggy
+            // seeder run can leave in the DB.
+            $raw = str_replace(['\\r\\n', '\\n', '\\r'], "\n", $raw);
+            // Collapse multiple newlines down to one.
+            $raw = preg_replace("/\n+/", "\n", $raw);
+            return $raw;
+        }
+    }
+
+    /* ------------------------------------------------------------------
+     | sn_render_slider_title($raw)
+     |
+     | XSS-safe formatter for slider titles. Returns an HtmlString so
+     | {!! !!} can render it without re-escaping, but EVERY user-provided
+     | fragment is run through e() before insertion. The only HTML this
+     | function ever emits is <span class="sn-hl"> and <br> — both are
+     | hard-coded.
+     |
+     | Recognised input patterns (in priority order):
+     |
+     |   1. Legacy seeded markup:
+     |        "<span class='in'>X</span><br> - Y"
+     |        "<span class=\"in\">X</span><br/>Y"
+     |      → <span class="sn-hl">{escaped X}</span><br>{escaped Y}
+     |
+     |   2. Shortcode for new entries:
+     |        "[hl]X[/hl] - Y"
+     |        "[hl]X[/hl]\n- Y"
+     |      → <span class="sn-hl">{escaped X}</span> - Y   (or with <br>)
+     |
+     |   3. Real newlines:
+     |        "X\n- Y"
+     |      → {escaped X}<br>{escaped Y}
+     |
+     |   4. Plain text:
+     |      → fully escaped, no markup at all.
+     |
+     | Anything else is just escaped. There is NO path where untrusted
+     | HTML reaches the DOM.
+     ------------------------------------------------------------------ */
+    if (!function_exists('sn_render_slider_title')) {
+        function sn_render_slider_title(string $raw): \Illuminate\Support\HtmlString
+        {
+            $raw = trim($raw);
+            if ($raw === '') {
+                return new \Illuminate\Support\HtmlString('');
+            }
+
+            /* ---- Pattern 1: legacy <span class='in'>...</span><br>... ---- */
+            $legacy = '/^\s*<span\s+class\s*=\s*[\'"]in[\'"]\s*>(.*?)<\/span>\s*<br\s*\/?>\s*-?\s*(.*)$/is';
+            if (preg_match($legacy, $raw, $m)) {
+                $hl   = e(trim(strip_tags($m[1])));
+                $rest = e(trim(strip_tags($m[2])));
+                $html = '<span class="sn-hl">' . $hl . '</span>';
+                if ($rest !== '') {
+                    $html .= '<br>' . $rest;
+                }
+                return new \Illuminate\Support\HtmlString($html);
+            }
+
+            /* ---- Pattern 2: shortcode [hl]...[/hl] (with optional newlines) ---- */
+            if (preg_match('/\[hl\](.*?)\[\/hl\]/s', $raw)) {
+                // Escape EVERYTHING first.
+                $escaped = e($raw);
+                // Then convert real newlines to <br>.
+                $escaped = nl2br($escaped, false);
+                // Finally swap the (escaped) shortcode markers for our
+                // trusted span. Because we escaped first, the inner
+                // content is already safe.
+                $rendered = preg_replace_callback(
+                    '/\[hl\](.*?)\[\/hl\]/s',
+                    function ($m) { return '<span class="sn-hl">' . $m[1] . '</span>'; },
+                    $escaped
+                );
+                return new \Illuminate\Support\HtmlString($rendered);
+            }
+
+            /* ---- Pattern 3: plain text with real newlines ---- */
+            if (str_contains($raw, "\n") || str_contains($raw, "\r")) {
+                return new \Illuminate\Support\HtmlString(nl2br(e($raw), false));
+            }
+
+            /* ---- Pattern 4: pure plain text (or unrecognised HTML) ---- */
+            return new \Illuminate\Support\HtmlString(e(trim(strip_tags($raw))));
+        }
+    }
 ?>
 
 <section class="main-slider"
@@ -27,12 +136,24 @@
                 <?php
                     $isFirst   = $loop->first;
                     $imgPath   = $slider->image ? asset($slider->image) : asset('front/assets/images/hero-placeholder.jpg');
-                    $title     = trim((string) tr($slider, 'title'));
-                    $subTitle  = trim((string) tr($slider, 'sub_title'));
-                    $btnTitle  = trim((string) tr($slider, 'button_title'));
+
+                    /* Read translated values via tr() if available, else raw column */
+                    $titleRaw  = trim((string) (function_exists('tr') ? tr($slider, 'title') : ($slider->title ?? '')));
+                    $subTitle  = trim((string) (function_exists('tr') ? tr($slider, 'sub_title') : ($slider->sub_title ?? '')));
+                    $btnTitle  = trim((string) (function_exists('tr') ? tr($slider, 'button_title') : ($slider->button_title ?? '')));
+
+                    /* Wave 5c: normalise literal "\n" before the renderer sees it */
+                    $titleRaw  = sn_normalise_slider_title($titleRaw);
+
+                    /* Render-ready title (HtmlString — safe, see helper above) */
+                    $titleHtml  = sn_render_slider_title($titleRaw);
+
+                    /* Plain-text version of title for alt= and aria-label */
+                    $titlePlain = trim(strip_tags((string) $titleHtml));
+
                     $btnUrl    = $slider->button_url ?: '#';
-                    $videoUrl  = $slider->video_url ?: null;
-                    $altText   = $title ?: ($isEN ? 'StepNow Rides & Movers' : 'StepNow Rides & Movers');
+                    $videoUrl  = $slider->video_url ?? null;
+                    $altText   = $titlePlain ?: 'StepNow Rides & Movers';
                 ?>
 
                 <div class="item"
@@ -56,11 +177,12 @@
                     <div class="container">
                         <div class="main-slider__content">
 
-                            <?php if($title): ?>
-                                <h2 class="main-slider__title"><?php echo e($title); ?></h2>
+                            <?php if($titlePlain !== ''): ?>
+                                
+                                <h2 class="main-slider__title"><?php echo $titleHtml; ?></h2>
                             <?php endif; ?>
 
-                            <?php if($subTitle): ?>
+                            <?php if($subTitle !== ''): ?>
                                 <div class="main-slider__sub-title-box mt-3">
                                     <p class="main-slider__sub-title"><?php echo e($subTitle); ?></p>
                                 </div>
@@ -212,6 +334,23 @@
     .main-slider__pause:hover { background: rgba(0, 0, 0, 0.65); }
     .main-slider__pause:focus-visible { outline: 3px solid var(--sn-accent); outline-offset: 2px; }
 
+    /* Wave 5b: brand-accent highlight for [hl]…[/hl] in titles */
+    .main-slider__title .sn-hl {
+        position: relative;
+        color: inherit;
+        white-space: nowrap;
+    }
+    .main-slider__title .sn-hl::after {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; bottom: -.05em;
+        height: .12em;
+        background: #ffc107;
+        border-radius: 2px;
+        z-index: -1;
+        opacity: .85;
+    }
+
     /* Empty-state hero gets a brand-tinted background so it's not a blank box */
     .main-slider:not(:has(.main-slider__carousel)) {
         background: linear-gradient(135deg, var(--sn-primary-700) 0%, var(--sn-primary) 100%);
@@ -221,5 +360,4 @@
     .main-slider:not(:has(.main-slider__carousel)) .main-slider__title { color: #fff; }
     .main-slider:not(:has(.main-slider__carousel)) .main-slider__sub-title { color: rgba(255,255,255,0.92); }
 </style>
-<?php $__env->stopPush(); ?>
-<?php /**PATH D:\laragon\www\Step-Now\resources\views/front/partials/slider/slider.blade.php ENDPATH**/ ?>
+<?php $__env->stopPush(); ?><?php /**PATH D:\laragon\www\Step-Now\resources\views/front/partials/slider/slider.blade.php ENDPATH**/ ?>

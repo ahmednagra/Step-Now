@@ -1,6 +1,5 @@
 
 
-
 <link href="https://fonts.bunny.net/css?family=roboto:100,300,400,500,700,900&family=inter-tight:100,200,300,400,500,600,700,800,900&display=swap"
       rel="stylesheet">
 
@@ -29,8 +28,8 @@
 <link rel="stylesheet" href="<?php echo e(asset('front/assets/css/vendor/notyf.min.css')); ?>">
 
 
-<link rel="stylesheet" href="<?php echo e(asset('public/front/assets/css/custom-tokens.css')); ?>"
-      onerror="this.onerror=null;this.href='<?php echo e(asset('front/assets/css/custom-tokens.css')); ?>';">
+
+<link rel="stylesheet" href="<?php echo e(asset('front/assets/css/custom-tokens.css')); ?>">
 
 
 <link rel="stylesheet" href="<?php echo e(asset('front/assets/css/module-css/slider.css')); ?>">
@@ -61,8 +60,10 @@
 <link rel="stylesheet" href="<?php echo e(asset('front/assets/css/style.css')); ?>">
 
 
+<?php echo $__env->yieldContent('css'); ?>
+
+
 <link rel="stylesheet" href="<?php echo e(asset('front/assets/css/responsive.css')); ?>">
 
 
-<link rel="stylesheet" href="<?php echo e(asset('front/assets/css/stepnow-brand.css')); ?>">
-<?php /**PATH D:\laragon\www\Step-Now\resources\views/front/layouts/partials/styles.blade.php ENDPATH**/ ?>
+<link rel="stylesheet" href="<?php echo e(asset('front/assets/css/stepnow-brand.css')); ?>"><?php /**PATH D:\laragon\www\Step-Now\resources\views/front/layouts/partials/styles.blade.php ENDPATH**/ ?>

@@ -1,154 +1,404 @@
-/* =============================================================================
-   step-now.de — Brand polish stylesheet (loaded LAST, overrides theme)
-   =============================================================================
 
-   Goals:
-     • German typographic conventions (Anführungszeichen „…", Halbgeviertstrich,
-       non-breaking space)
-     • Accessibility: focus rings, motion reduction, contrast, target size
-     • Smooth bilingual experience: html[lang^="en"] uses English quotes
-     • Brand polish (button hover, scrollbars, print stylesheet for legal pages)
-   ============================================================================= */
-
-:root {
-    --sn-brand:       #0F4C81;
-    --sn-brand-dark:  #0B385F;
-    --sn-accent:      #FFC107;
-    --sn-success:     #0F7B33;
-    --sn-warn:        #B45F06;
-    --sn-error:       #C8102E;
-    --sn-text:        #1A1A1A;
-    --sn-text-muted:  #545C66;
-    --sn-bg-soft:     #F2F4F7;
-    --sn-bg:          #FFFFFF;
-    --sn-border:      #E1E4E8;
-    --sn-radius:      10px;
-    --sn-radius-sm:   6px;
-    --sn-shadow-soft: 0 4px 14px rgba(15, 76, 129, .08);
-    --sn-shadow-lift: 0 12px 36px rgba(15, 76, 129, .14);
-    --sn-tap:         44px;
+/* ────────────────────────────────────────────────────────────────────────────
+   1) STICKY-ON-SCROLL HEADER — keep hidden at rest (carried forward from 5d)
+   ────────────────────────────────────────────────────────────────────────────
+   Theme renders <div class="stricky-header stricked-menu main-menu"> as an
+   empty placeholder. Theme JS toggles a "stuck" class on scroll. Until then,
+   the empty shell shows its dark background. We hide it at rest, re-show as
+   position:fixed when the JS marks it active.
+*/
+.stricky-header,
+.stricky-header.stricked-menu {
+    display: none !important;
+}
+.stricky-header.stricky-fixed,
+.stricky-header.stricky-header--shown,
+.stricky-header.is-stuck,
+.stricky-header.is-active {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
 }
 
-/* -----------------------------------------------------------------------------
-   1. Typography & locale-aware quotation marks
-   --------------------------------------------------------------------------- */
-html[lang^="de"] { quotes: "\201E" "\201C" "\201A" "\2018"; } /* „ " ‚ ' */
-html[lang^="en"] { quotes: "\201C" "\201D" "\2018" "\2019"; } /* " " ' ' */
-q::before { content: open-quote;  }
-q::after  { content: close-quote; }
 
-/* Locale-aware decimal display via .sn-num */
-.sn-num { font-variant-numeric: tabular-nums; }
-
-abbr[title] { text-decoration: underline dotted; cursor: help; }
-mark        { background: #FFF3BF; padding: 0 .15em; border-radius: 2px; }
-address     { font-style: normal; }
-
-body { font-feature-settings: "ss01" on, "kern" on; }
-html[lang^="de"] p,
-html[lang^="de"] li { hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto; }
-
-/* -----------------------------------------------------------------------------
-   2. Accessibility (BFSG / WCAG 2.1 AA)
-   --------------------------------------------------------------------------- */
-
-/* Visible, predictable focus ring */
-:focus-visible {
-    outline: 3px solid var(--sn-accent);
-    outline-offset: 2px;
-    border-radius: 3px;
-}
-button:focus, a:focus, input:focus, textarea:focus, select:focus { outline: none; }
-
-/* Minimum tap target — WCAG 2.5.5 */
-.thm-btn, .btn, .main-menu__btn, .stepnow-cb__btn,
-.sn-banner__cta {
-    min-height: var(--sn-tap);
-    display: inline-flex; align-items: center; justify-content: center;
+/* ────────────────────────────────────────────────────────────────────────────
+   2) KILL THE WHITE STRIP — collapse all bottom-of-header / top-of-main gaps
+   ────────────────────────────────────────────────────────────────────────────
+   Three places the gap can come from:
+     a) <header> has margin-bottom / padding-bottom from style.css
+     b) <main> has margin-top / padding-top
+     c) .main-slider section has margin-top
+   We zero ALL THREE. !important is needed here because the vendor theme uses
+   high-specificity selectors like `.main-header.style-two` etc.
+*/
+.page-wrapper > header,
+.page-wrapper > .main-header,
+header.main-header {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
 }
 
-/* Respect "reduce motion" */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
-        scroll-behavior: auto !important;
+.page-wrapper > main,
+main#content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* The slider section itself — and its first child <div> if any */
+.main-slider {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+.main-slider > .main-slider__carousel {
+    margin-top: 0;
+}
+
+
+/* ────────────────────────────────────────────────────────────────────────────
+   3) HERO SLIDER — TIGHTER, CONTAINED HEIGHT (was 78vh, now ~55vh)
+   ────────────────────────────────────────────────────────────────────────────
+   Desktop: 55% viewport height, never below 320px, never above 600px.
+   Tablet:  50% viewport height, capped at 480px.
+   Mobile:  44% viewport height, capped at 400px.
+
+   These caps mean the hero is ALWAYS a "section" not a "full screen takeover"
+   regardless of monitor size — the rest of the homepage (services, about,
+   etc.) is visible above the fold on most desktop displays.
+*/
+.main-slider,
+section.main-slider {
+    min-height: clamp(280px, 36vh, 440px) !important;
+}
+.main-slider .item,
+section.main-slider .item {
+    min-height: clamp(280px, 36vh, 440px) !important;
+}
+
+/* Background image fills the slide, never overflows */
+.main-slider .main-slider__bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+}
+
+
+/* ────────────────────────────────────────────────────────────────────────────
+   4) HERO TITLE — fluid responsive type, sized for the smaller hero
+   ────────────────────────────────────────────────────────────────────────────
+   Smaller hero needs smaller headline. Was clamp(2rem, 5.5vw, 5.5rem) at 5d.
+   Now clamp(1.75rem, 4.4vw, 3.75rem) — readable on phones, hero-sized but
+   not gigantic on desktop.
+*/
+/* Higher-specificity selector to beat the theme's style.css rule.
+   The theme uses .main-slider .main-slider__title — we match that
+   and add the parent section.main-slider for extra weight, plus
+   !important on the size only (the bit that's being overridden). */
+section.main-slider .main-slider__content .main-slider__title,
+.main-slider .main-slider__title {
+    font-size: clamp(1rem, 1.8vw, 1.5rem) !important;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.35em;
+    max-width: min(100%, 22ch);
+    word-break: break-word;
+}
+
+/* Highlighted span (the [hl]…[/hl] yellow underline) needs to
+   inherit the new smaller font-size, not stay at the theme size. */
+section.main-slider .main-slider__title .sn-hl,
+.main-slider .main-slider__title span,
+.main-slider .main-slider__title .sn-hl {
+    font-size: inherit !important;
+    line-height: inherit;
+}
+
+section.main-slider .main-slider__content .main-slider__sub-title,
+.main-slider .main-slider__sub-title {
+    font-size: clamp(0.72rem, 0.85vw, 0.85rem) !important;
+    line-height: 1.5;
+    max-width: min(100%, 60ch);
+    margin: 0;
+}
+
+
+/* ────────────────────────────────────────────────────────────────────────────
+   5) CONTENT VERTICAL CENTERING
+   ────────────────────────────────────────────────────────────────────────────
+   Centre .main-slider__content vertically inside the (now smaller) slide.
+*/
+.main-slider .item > .container {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    min-height: inherit;
+    display: flex;
+    align-items: center;
+}
+.main-slider__content {
+    width: 100%;
+    padding: clamp(0.5rem, 2vh, 1.25rem) 0;
+}
+
+
+/* ────────────────────────────────────────────────────────────────────────────
+   6) RESPONSIVE BREAKPOINTS
+   ────────────────────────────────────────────────────────────────────────────
+*/
+
+@media (max-width: 991px) {
+    .main-slider,
+    section.main-slider,
+    .main-slider .item {
+        min-height: clamp(260px, 32vh, 380px) !important;
     }
-    .wow, .js-preloader { animation: none !important; }
+    .main-slider .main-slider__title {
+        max-width: 100% !important;
+        font-size: clamp(0.95rem, 2vw, 1.25rem) !important;
+    }
 }
 
-/* -----------------------------------------------------------------------------
-   3. Buttons (brand polish)
-   --------------------------------------------------------------------------- */
-.thm-btn:hover, .btn-primary:hover, .main-menu__btn:hover {
-    box-shadow: var(--sn-shadow-soft);
-}
-.thm-btn:active { transform: translateY(1px); }
-
-/* -----------------------------------------------------------------------------
-   4. Forms (consistent inputs, accessible error states, no iOS zoom)
-   --------------------------------------------------------------------------- */
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-input[type="time"],
-input[type="number"],
-textarea, select {
-    font-size: 16px;          /* avoids iOS zoom on focus */
-}
-input:focus-visible, textarea:focus-visible, select:focus-visible {
-    border-color: var(--sn-brand);
-    box-shadow: 0 0 0 3px rgba(15, 76, 129, .15);
-}
-.is-invalid, input.error, .text-danger {
-    border-color: var(--sn-error) !important;
-    color: var(--sn-error);
+@media (max-width: 575px) {
+    .main-slider,
+    section.main-slider,
+    .main-slider .item {
+        min-height: clamp(240px, 30vh, 320px) !important;
+    }
+    .main-slider .main-slider__title {
+        font-size: clamp(0.85rem, 3.4vw, 1.05rem) !important;
+    }
+    .main-slider .main-slider__sub-title {
+        font-size: clamp(0.7rem, 2.6vw, 0.8rem) !important;
+    }
+    .main-slider__btn-and-video-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 }
 
-/* -----------------------------------------------------------------------------
-   5. Pricing / package cards — German typographic polish
-   --------------------------------------------------------------------------- */
-.sn-price          { font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 700; }
-.sn-price__amount  { font-size: 2.4rem; color: var(--sn-brand); letter-spacing: -.02em; }
-.sn-price__suffix  { font-size: .95rem; color: var(--sn-text-muted); margin-left: .35rem; font-weight: 500; }
-.sn-price-card     {
-    background: var(--sn-bg);
-    border: 1px solid var(--sn-border);
-    border-radius: var(--sn-radius);
-    padding: 24px;
-    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-.sn-price-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--sn-shadow-lift);
-    border-color: var(--sn-brand);
+/* ────────────────────────────────────────────────────────────────────────────
+   7) REDUCED MOTION — no transition flicker on sticky reveal
+   ────────────────────────────────────────────────────────────────────────────
+*/
+@media (prefers-reduced-motion: reduce) {
+    .stricky-header,
+    .stricky-header.stricky-fixed,
+    .stricky-header.is-stuck {
+        transition: none !important;
+        animation: none !important;
+    }
 }
 
-/* -----------------------------------------------------------------------------
-   6. Image polish (improve perceived performance)
-   --------------------------------------------------------------------------- */
-img { max-width: 100%; height: auto; }
-img[loading="lazy"] { content-visibility: auto; }
-
-/* -----------------------------------------------------------------------------
-   7. Selection & scrollbar polish
-   --------------------------------------------------------------------------- */
-::selection { background: var(--sn-accent); color: var(--sn-text); }
-* { scrollbar-width: thin; scrollbar-color: var(--sn-brand) transparent; }
-*::-webkit-scrollbar         { width: 10px; height: 10px; }
-*::-webkit-scrollbar-thumb   { background: var(--sn-brand); border-radius: 6px; }
-*::-webkit-scrollbar-track   { background: transparent; }
-
-/* -----------------------------------------------------------------------------
-   8. Print stylesheet (legal pages must print cleanly)
-   --------------------------------------------------------------------------- */
-@media print {
-    .main-header, .main-footer, .sn-banners,
-    #stepnow-cookie-banner, .js-preloader, .sn-skip,
-    .main-menu__btn-box, .main-menu__top { display: none !important; }
-    main { padding: 0 !important; }
-    body { color: #000; background: #fff; }
-    a::after { content: " (" attr(href) ")"; font-size: .85em; color: #555; }
+/* ────────────────────────────────────────────────────────────────────────────
+   Wave 5g — language toggle inside the white nav bar
+   ────────────────────────────────────────────────────────────────────────────
+   The DE/EN toggle was moved out of the (deleted) dark blue top bar and into
+   .main-menu__right, sitting next to the "Call anytime" CTA. These rules
+   give it a tidy inline appearance that matches the white nav bar.
+*/
+.sn-lang-toggle--inline {
+    display: inline-flex;
+    gap: 4px;
+    margin-right: 16px;
+    align-items: center;
 }
+
+.sn-lang-toggle--inline .sn-lang-toggle__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sn-lang-toggle--inline .sn-lang-toggle__btn:hover {
+    background: #e2e8f0;
+    color: #0F4C81;
+    border-color: #cbd5e1;
+}
+
+.sn-lang-toggle--inline .sn-lang-toggle__btn[aria-current="true"] {
+    background: #ffc107;
+    color: #0e1a2b;
+    border-color: #ffc107;
+}
+
+/* On smaller viewports, hide the language toggle to save space.
+   Users on mobile can still switch via the side-panel sidebar. */
+@media (max-width: 767px) {
+    .sn-lang-toggle--inline {
+        display: none;
+    }
+}
+
+/* Wave 5g — compact the soft-launch banner */
+#stepnow-site-banners .banner-row,
+.site-banner__row,
+[role="status"].site-banner {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-size: 0.85rem;
+    line-height: 1.35;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Wave 5h — overlay header pattern (reclaim ~165px above the fold)
+   ────────────────────────────────────────────────────────────────────────────
+   Pattern: site-banner stays slim at the top, header overlays the hero
+   image (transparent, absolute), hero starts at top:0 and reserves
+   ~110px of safe space at its top so the title clears the logo.
+
+   Reverting: just delete this whole block. Layout returns to current state.
+*/
+
+/* 1. SLIM BANNER ─────────────────────────────────────────────────────────── */
+.sn-banners .sn-banner {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+.sn-banners .sn-banner .sn-banner__inner {
+    gap: 8px;
+}
+.sn-banners .sn-banner .sn-banner__icon {
+    font-size: 0.95rem;
+}
+
+/* Dismiss button injected via JS (see Edit 2) */
+.sn-banner__dismiss {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-left: 6px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1rem;
+    line-height: 1;
+}
+.sn-banner__dismiss:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+/* When banner is dismissed in this session, hide it entirely */
+body.sn-banner-dismissed .sn-banners {
+    display: none;
+}
+
+/* 2. HEADER OVERLAYS THE HERO ────────────────────────────────────────────── */
+/* Only on the homepage — body class is added by JS in Edit 2.
+   This pattern doesn't suit interior pages where the hero is a different
+   color or the header should stay opaque. */
+body.sn-overlay-hero .page-wrapper {
+    position: relative;
+}
+
+body.sn-overlay-hero header.main-header {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* The white nav bar inside the header — make it transparent + add a soft
+   gradient backdrop so the menu stays readable over varied images. */
+body.sn-overlay-hero header.main-header .main-menu {
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.35) 0%,
+        rgba(0, 0, 0, 0) 100%
+    );
+}
+
+/* Logo, menu items, call CTA — invert to white over the dark image */
+body.sn-overlay-hero header.main-header .main-menu__list > li > a,
+body.sn-overlay-hero header.main-header .main-menu__call-sub-title,
+body.sn-overlay-hero header.main-header .main-menu__call-number a {
+    color: #ffffff;
+}
+body.sn-overlay-hero header.main-header .main-menu__list > li > a:hover {
+    color: #ffc107;
+}
+
+/* Logo image — bump brightness slightly so dark logos stay legible.
+   If your logo is already white-on-transparent, this filter is a no-op. */
+body.sn-overlay-hero header.main-header .main-menu__logo img {
+    filter: brightness(1.05) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+/* Language toggle — give it a backdrop so it stays legible */
+body.sn-overlay-hero header.main-header .sn-lang-toggle--inline .sn-lang-toggle__btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+body.sn-overlay-hero header.main-header .sn-lang-toggle--inline .sn-lang-toggle__btn[aria-current="true"] {
+    background: #ffc107;
+    color: #0e1a2b;
+    border-color: #ffc107;
+}
+
+/* Hamburger lines — turn white */
+body.sn-overlay-hero header.main-header .navSidebar-button span {
+    background-color: #ffffff !important;
+}
+
+/* Call CTA icon */
+body.sn-overlay-hero header.main-header .main-menu__call-icon {
+    color: #ffc107;
+}
+
+/* 3. HERO STARTS AT TOP, RESERVES SPACE FOR HEADER ──────────────────────── */
+body.sn-overlay-hero .main-slider {
+    /* Re-establish content padding inside the hero so the title clears
+       the absolutely-positioned header. ~110px is the height of the
+       white nav bar; tweak if your logo is smaller/taller. */
+    padding-top: 110px !important;
+}
+
+/* On phones the header collapses to a hamburger row (~70px) */
+@media (max-width: 767px) {
+    body.sn-overlay-hero .main-slider {
+        padding-top: 76px !important;
+    }
+}
+
+/* Adjust the inner content vertical centering so it stays balanced
+   inside the new top-padded slide */
+body.sn-overlay-hero .main-slider .item > .container {
+    align-items: center;
+    /* Pull the content slightly upward so it sits visually centred
+       in the *visible* area below the header, not centred in the
+       full slide (which includes the 110px header overlay area). */
+    padding-top: 0;
+}
+
+/* 4. INTERIOR PAGES — keep the original header look ─────────────────────── */
+/* (No rules needed; without body.sn-overlay-hero, the header stays as it
+   was in the previous wave. Only the homepage gets the overlay treatment.)
+*/
