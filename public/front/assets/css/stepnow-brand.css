@@ -1,0 +1,154 @@
+/* =============================================================================
+   step-now.de — Brand polish stylesheet (loaded LAST, overrides theme)
+   =============================================================================
+
+   Goals:
+     • German typographic conventions (Anführungszeichen „…", Halbgeviertstrich,
+       non-breaking space)
+     • Accessibility: focus rings, motion reduction, contrast, target size
+     • Smooth bilingual experience: html[lang^="en"] uses English quotes
+     • Brand polish (button hover, scrollbars, print stylesheet for legal pages)
+   ============================================================================= */
+
+:root {
+    --sn-brand:       #0F4C81;
+    --sn-brand-dark:  #0B385F;
+    --sn-accent:      #FFC107;
+    --sn-success:     #0F7B33;
+    --sn-warn:        #B45F06;
+    --sn-error:       #C8102E;
+    --sn-text:        #1A1A1A;
+    --sn-text-muted:  #545C66;
+    --sn-bg-soft:     #F2F4F7;
+    --sn-bg:          #FFFFFF;
+    --sn-border:      #E1E4E8;
+    --sn-radius:      10px;
+    --sn-radius-sm:   6px;
+    --sn-shadow-soft: 0 4px 14px rgba(15, 76, 129, .08);
+    --sn-shadow-lift: 0 12px 36px rgba(15, 76, 129, .14);
+    --sn-tap:         44px;
+}
+
+/* -----------------------------------------------------------------------------
+   1. Typography & locale-aware quotation marks
+   --------------------------------------------------------------------------- */
+html[lang^="de"] { quotes: "\201E" "\201C" "\201A" "\2018"; } /* „ " ‚ ' */
+html[lang^="en"] { quotes: "\201C" "\201D" "\2018" "\2019"; } /* " " ' ' */
+q::before { content: open-quote;  }
+q::after  { content: close-quote; }
+
+/* Locale-aware decimal display via .sn-num */
+.sn-num { font-variant-numeric: tabular-nums; }
+
+abbr[title] { text-decoration: underline dotted; cursor: help; }
+mark        { background: #FFF3BF; padding: 0 .15em; border-radius: 2px; }
+address     { font-style: normal; }
+
+body { font-feature-settings: "ss01" on, "kern" on; }
+html[lang^="de"] p,
+html[lang^="de"] li { hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto; }
+
+/* -----------------------------------------------------------------------------
+   2. Accessibility (BFSG / WCAG 2.1 AA)
+   --------------------------------------------------------------------------- */
+
+/* Visible, predictable focus ring */
+:focus-visible {
+    outline: 3px solid var(--sn-accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+button:focus, a:focus, input:focus, textarea:focus, select:focus { outline: none; }
+
+/* Minimum tap target — WCAG 2.5.5 */
+.thm-btn, .btn, .main-menu__btn, .stepnow-cb__btn,
+.sn-banner__cta {
+    min-height: var(--sn-tap);
+    display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* Respect "reduce motion" */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .wow, .js-preloader { animation: none !important; }
+}
+
+/* -----------------------------------------------------------------------------
+   3. Buttons (brand polish)
+   --------------------------------------------------------------------------- */
+.thm-btn:hover, .btn-primary:hover, .main-menu__btn:hover {
+    box-shadow: var(--sn-shadow-soft);
+}
+.thm-btn:active { transform: translateY(1px); }
+
+/* -----------------------------------------------------------------------------
+   4. Forms (consistent inputs, accessible error states, no iOS zoom)
+   --------------------------------------------------------------------------- */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+textarea, select {
+    font-size: 16px;          /* avoids iOS zoom on focus */
+}
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+    border-color: var(--sn-brand);
+    box-shadow: 0 0 0 3px rgba(15, 76, 129, .15);
+}
+.is-invalid, input.error, .text-danger {
+    border-color: var(--sn-error) !important;
+    color: var(--sn-error);
+}
+
+/* -----------------------------------------------------------------------------
+   5. Pricing / package cards — German typographic polish
+   --------------------------------------------------------------------------- */
+.sn-price          { font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 700; }
+.sn-price__amount  { font-size: 2.4rem; color: var(--sn-brand); letter-spacing: -.02em; }
+.sn-price__suffix  { font-size: .95rem; color: var(--sn-text-muted); margin-left: .35rem; font-weight: 500; }
+.sn-price-card     {
+    background: var(--sn-bg);
+    border: 1px solid var(--sn-border);
+    border-radius: var(--sn-radius);
+    padding: 24px;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.sn-price-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sn-shadow-lift);
+    border-color: var(--sn-brand);
+}
+
+/* -----------------------------------------------------------------------------
+   6. Image polish (improve perceived performance)
+   --------------------------------------------------------------------------- */
+img { max-width: 100%; height: auto; }
+img[loading="lazy"] { content-visibility: auto; }
+
+/* -----------------------------------------------------------------------------
+   7. Selection & scrollbar polish
+   --------------------------------------------------------------------------- */
+::selection { background: var(--sn-accent); color: var(--sn-text); }
+* { scrollbar-width: thin; scrollbar-color: var(--sn-brand) transparent; }
+*::-webkit-scrollbar         { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb   { background: var(--sn-brand); border-radius: 6px; }
+*::-webkit-scrollbar-track   { background: transparent; }
+
+/* -----------------------------------------------------------------------------
+   8. Print stylesheet (legal pages must print cleanly)
+   --------------------------------------------------------------------------- */
+@media print {
+    .main-header, .main-footer, .sn-banners,
+    #stepnow-cookie-banner, .js-preloader, .sn-skip,
+    .main-menu__btn-box, .main-menu__top { display: none !important; }
+    main { padding: 0 !important; }
+    body { color: #000; background: #fff; }
+    a::after { content: " (" attr(href) ")"; font-size: .85em; color: #555; }
+}

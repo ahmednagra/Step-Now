@@ -1,1 +1,39 @@
-{}
+{
+    "Home": "Home",
+    "About Us": "About Us",
+    "About us": "About Us",
+    "Services": "Services",
+    "Our Services": "Our Services",
+    "Pricing": "Pricing",
+    "Gallery": "Gallery",
+    "Contact": "Contact",
+    "Sign in": "Sign In",
+
+    "Quick Links": "Quick Links",
+    "Legal": "Legal",
+    "Imprint": "Imprint",
+    "Privacy Policy": "Privacy Policy",
+    "Terms & Conditions": "Terms & Conditions",
+    "Right of Withdrawal": "Right of Withdrawal",
+    "Cookie Policy": "Cookie Policy",
+    "Cookie Settings": "Cookie Settings",
+    "All rights reserved.": "All rights reserved.",
+
+    "Book Now": "Request Now",
+    "Book a Car": "Request a Vehicle",
+    "Send request": "Send request",
+    "Request a Free Quote": "Request a Free Quote",
+    "Apply Now": "Apply Now",
+    "Subscribe": "Subscribe",
+    "Stay Informed": "Stay Informed",
+    "Email Address": "Email Address",
+
+    "Cookies & Privacy": "Cookies & Privacy",
+    "Necessary": "Necessary",
+    "Statistics": "Statistics",
+    "Marketing": "Marketing",
+    "Reject All": "Reject All",
+    "Settings": "Settings",
+    "Save Selection": "Save Selection",
+    "Accept All": "Accept All"
+}

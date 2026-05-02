@@ -1,7 +1,7 @@
 {{--
     Front-end stylesheet bundle.
 
-    Compliance changes:
+    Compliance changes (kept from previous version):
       - Google Fonts (fonts.googleapis.com / fonts.gstatic.com) replaced
         by fonts.bunny.net. Bunny Fonts is a privacy-friendly drop-in
         replacement, EU-hosted (Slovenia), no IP-logging, no Google
@@ -10,10 +10,12 @@
 
       - jsDelivr CDN dependencies (bootstrap-icons, notyf) replaced by
         locally-hosted copies under /public/front/assets/css/vendor/.
-        See public/PATCHES_README.md for the install command.
 
-    If a designer ever wants to re-add a third-party CSS source, route
-    it through the cookie banner first (it must NOT load before consent).
+    NEW 2026-05-02:
+      - stepnow-brand.css loaded LAST so it can override theme defaults.
+        Provides locale-aware quotes, focus rings, 44 px tap targets,
+        16 px form inputs (no iOS zoom), prefers-reduced-motion, and a
+        print stylesheet for legal pages.
 --}}
 
 {{-- Self-host-friendly font replacement (was: fonts.googleapis.com) --}}
@@ -35,6 +37,7 @@
 <link rel="stylesheet" href="{{ asset('front/assets/css/jarallax.css') }}" />
 <link rel="stylesheet" href="{{ asset('front/assets/css/jquery.magnific-popup.css') }}" />
 <link rel="stylesheet" href="{{ asset('front/assets/css/flaticon.css') }}">
+
 <link rel="stylesheet" href="{{ asset('front/assets/css/owl.carousel.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('front/assets/css/owl.theme.default.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('front/assets/css/nice-select.css') }}" />
@@ -42,7 +45,6 @@
 <link rel="stylesheet" href="{{ asset('front/assets/css/aos.css') }}" />
 <link rel="stylesheet" href="{{ asset('front/assets/css/odometer.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('front/assets/css/timePicker.css') }}" />
-
 
 <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/slider.css') }}" />
 <link rel="stylesheet" href="{{ asset('front/assets/css/module-css/footer.css') }}" />
@@ -71,3 +73,6 @@
 
 @yield('css')
 <link rel="stylesheet" href="{{ asset('front/assets/css/responsive.css') }}" />
+
+{{-- Brand polish — loaded LAST so it can override theme defaults --}}
+<link rel="stylesheet" href="{{ asset('front/assets/css/stepnow-brand.css') }}" />

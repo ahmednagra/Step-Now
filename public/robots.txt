@@ -1,6 +1,6 @@
 User-agent: *
 
-# Block admin & auth surfaces from search-engine indexing.
+# ===== Block admin & auth surfaces from search-engine indexing ============
 Disallow: /login
 Disallow: /register
 Disallow: /password
@@ -19,15 +19,36 @@ Disallow: /pendingUsers
 Disallow: /approvedUsers
 Disallow: /blockedUsers
 
-# Block uploads / runtime asset paths from indexing.
-Disallow: /storage/
+# ===== Block admin-side asset paths =====================================
 Disallow: /assets/admin/
+Disallow: /assets/admin/uploads/
+Disallow: /assets/admin/img/
 
-# Public legal pages — explicitly allowed
+# ===== Block bot probes ================================================
+Disallow: /editProfile
+Disallow: /updateProfile
+Disallow: /updatePassword
+Disallow: /edit-profile
+Disallow: /update-Profile
+Disallow: /update-password
+Disallow: /pending-user
+Disallow: /blocked-user
+
+# ===== Allow public-facing storage (uploaded slider images, OG previews) ====
+Allow: /storage/
+
+# ===== Allow public legal pages explicitly ==============================
 Allow: /impressum
 Allow: /datenschutz
 Allow: /agb
 Allow: /widerrufsbelehrung
 Allow: /cookie-richtlinie
+
+# ===== Allow newsletter confirm / unsubscribe paths from emails ===========
+Allow: /newsletter/confirm/
+Allow: /newsletter/unsubscribe/
+
+# ===== Allow locale switcher ============================================
+Allow: /locale/
 
 Sitemap: https://step-now.de/sitemap.xml

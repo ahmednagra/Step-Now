@@ -1,61 +1,75 @@
 <?php
 
-/**
- * StepNow Rides — locale-aware URL helpers.
- *
- * These helpers wrap Laravel's route() and url() so that when the current
- * locale is non-default (e.g. 'en'), the generated URL automatically includes
- * ?lang=en. The default locale ('de') gets clean URLs (no query param) for
- * SEO friendliness on the German market.
- *
- * Usage in Blade:
- *     <a href="{{ lroute('front.about') }}">{{ __('About Us') }}</a>
- *     <a href="{{ lurl('/some-path') }}">…</a>
- *
- * Why this exists:
- *     route() generates clean URLs, but those URLs lose the ?lang=en hint.
- *     If the user's session/cookie is intact the locale persists fine, but
- *     the URL preview (status bar on hover) shows the bare URL which can
- *     confuse users and harms SEO indexing of the EN variant. With lroute(),
- *     the URL preview always shows the localized URL.
+/*
+ |---------------------------------------------------------------------------
+ | Locale-aware URL helpers
+ |---------------------------------------------------------------------------
+ | German is the default locale and gets clean URLs (no ?lang=de query).
+ | English appends ?lang=en so the URL preview makes the variant explicit.
+ |
+ |     <a href="{{ lroute('front.about') }}">{{ __('About us') }}</a>
+ |     <a href="{{ lurl('/some-path') }}">…</a>
+ |
+ | When called from a page that is already on the EN locale, lroute() will
+ | preserve the ?lang=en suffix, so all in-page links stay in English.
  */
 
+if (!function_exists('_locale_query_separator')) {
+    function _locale_query_separator(string $url): string
+    {
+        return str_contains($url, '?') ? '&' : '?';
+    }
+}
+
 if (!function_exists('lroute')) {
-    /**
-     * Like route(), but appends ?lang=<locale> when locale is non-default.
-     */
     function lroute(string $name, mixed $parameters = [], bool $absolute = true): string
     {
-        $url = route($name, $parameters, $absolute);
-
+        $url     = route($name, $parameters, $absolute);
         $current = app()->getLocale();
         $default = config('app.locale', 'de');
 
         if ($current === $default) {
             return $url;
         }
-
-        $separator = str_contains($url, '?') ? '&' : '?';
-        return $url . $separator . 'lang=' . $current;
+        return $url . _locale_query_separator($url) . 'lang=' . $current;
     }
 }
 
 if (!function_exists('lurl')) {
-    /**
-     * Like url(), but appends ?lang=<locale> when locale is non-default.
-     */
     function lurl(string $path = '', mixed $parameters = [], ?bool $secure = null): string
     {
-        $url = url($path, $parameters, $secure);
-
+        $url     = url($path, $parameters, $secure);
         $current = app()->getLocale();
         $default = config('app.locale', 'de');
 
         if ($current === $default) {
             return $url;
         }
+        return $url . _locale_query_separator($url) . 'lang=' . $current;
+    }
+}
 
-        $separator = str_contains($url, '?') ? '&' : '?';
-        return $url . $separator . 'lang=' . $current;
+if (!function_exists('locale_url_for')) {
+    /**
+     * Build the URL of the CURRENT page in a SPECIFIC locale. Used by the
+     * language switcher and by the hreflang <link> tags.
+     *
+     *     locale_url_for('de')   →  current path with ?lang=de stripped (default)
+     *     locale_url_for('en')   →  current path with ?lang=en
+     */
+    function locale_url_for(string $lang): string
+    {
+        $path  = request()->path() === '/' ? '/' : '/' . request()->path();
+        $query = request()->query();
+        unset($query['lang']);
+
+        $base = url($path);
+        $default = config('app.locale', 'de');
+
+        if ($lang === $default) {
+            return empty($query) ? $base : $base . '?' . http_build_query($query);
+        }
+        $query['lang'] = $lang;
+        return $base . '?' . http_build_query($query);
     }
 }

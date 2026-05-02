@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\FrontController;
 use App\Http\Controllers\Front\PolicyController;
 use App\Http\Controllers\Front\NewsletterController;
+use App\Http\Controllers\Front\SitemapController;
 use App\Http\Controllers\LocaleController;
 
 /*
@@ -16,7 +17,15 @@ use App\Http\Controllers\LocaleController;
  |  - Five legal pages served from `policies` table via PolicyController.
  |    Bilingual: picks the EN column when locale=='en' AND it has content.
  |  - /locale/{lang} switches language and redirects back to Referer.
+ |  - /sitemap.xml is served by SitemapController and includes hreflang
+ |    alternates per URL.
+ |  - Newsletter confirm/unsubscribe tokens are constrained to 64-char
+ |    alphanumeric strings to keep route binding fast and obvious bot
+ |    traffic out of the controller.
  */
+
+// ----- Sitemap (no throttle, no auth — must be reachable for crawlers) -----
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('front.sitemap');
 
 // ----- Locale switcher ------------------------------------------------------
 Route::get('/locale/{lang}', [LocaleController::class, 'switch'])
@@ -40,11 +49,16 @@ Route::middleware('throttle:5,1')->group(function () {
     Route::post('/newsletter-store', [NewsletterController::class, 'store'])->name('front.newsletter.store');
 });
 
-// ----- Newsletter Double-Opt-In ---------------------------------------------
-Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])
-    ->name('front.newsletter.confirm');
-Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])
-    ->name('front.newsletter.unsubscribe');
+// ----- Newsletter Double-Opt-In (rate-limited per IP) ----------------------
+Route::middleware('throttle:30,1')->group(function () {
+    Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])
+        ->name('front.newsletter.confirm')
+        ->where('token', '[A-Za-z0-9]{64}');
+
+    Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])
+        ->name('front.newsletter.unsubscribe')
+        ->where('token', '[A-Za-z0-9]{64}');
+});
 
 // ----- Legal pages (DDG / DSGVO / TDDDG) — bilingual ------------------------
 Route::get('/impressum',          [PolicyController::class, 'impressum'])->name('front.impressum');
