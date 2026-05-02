@@ -8,19 +8,26 @@ use Illuminate\Support\Facades\App;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Reads the user's preferred locale and applies it for every web request.
+ * StepNow Rides — locale resolver middleware (HARDENED v2).
+ *
+ * Runs on every web request. Sets app()->getLocale() before any
+ * controller / view fires.
  *
  * Resolution order (first hit wins):
  *   1. ?lang=de or ?lang=en in the query string
- *      (so a deep-link like /impressum?lang=en works without first
- *       hitting /locale/en — useful for the courtesy-translation
- *       "View German version" link inside English policy pages).
- *   2. session('locale') — persisted by LocaleController@switch.
- *   3. config('app.locale') — the app default (set to 'de' in .env).
+ *      — also persisted to session so subsequent clicks keep the locale
+ *      — the session->save() call is EXPLICIT so the cookie/DB write is
+ *        flushed before the response is sent (otherwise on the database
+ *        session driver, an immediately-following request can race and
+ *        read the OLD locale).
  *
- * Allowed values are pulled from config('app.available_locales');
+ *   2. session('locale') — persisted by step 1 or by LocaleController.
+ *
+ *   3. config('app.locale') — the app default (set to 'de' in config/app.php).
+ *
+ * Allowed values pulled from config('app.available_locales');
  * anything else falls through to the default (no exception thrown,
- * so a corrupt cookie can't 500 the site).
+ * so a corrupt cookie cannot 500 the site).
  */
 class SetLocale
 {
@@ -29,23 +36,34 @@ class SetLocale
         $allowed = config('app.available_locales', ['de', 'en']);
         $default = config('app.locale', 'de');
 
-        // 1) Query param wins — also persists to session so subsequent
-        //    requests don't need ?lang=…
+        // ---- 1) ?lang= wins -------------------------------------------------
         $queryLang = $request->query('lang');
         if ($queryLang && in_array($queryLang, $allowed, true)) {
-            $request->session()->put('locale', $queryLang);
             App::setLocale($queryLang);
+
+            // Persist for subsequent requests
+            if ($request->hasSession()) {
+                if ($request->session()->get('locale') !== $queryLang) {
+                    $request->session()->put('locale', $queryLang);
+                    // EXPLICIT save — otherwise the database session driver
+                    // can write the new value AFTER the response cache layer
+                    // has already snapshotted the old locale. Cheap call.
+                    $request->session()->save();
+                }
+            }
             return $next($request);
         }
 
-        // 2) Session
-        $sessionLang = $request->session()->get('locale');
-        if ($sessionLang && in_array($sessionLang, $allowed, true)) {
-            App::setLocale($sessionLang);
-            return $next($request);
+        // ---- 2) Session -----------------------------------------------------
+        if ($request->hasSession()) {
+            $sessionLang = $request->session()->get('locale');
+            if ($sessionLang && in_array($sessionLang, $allowed, true)) {
+                App::setLocale($sessionLang);
+                return $next($request);
+            }
         }
 
-        // 3) Default
+        // ---- 3) Default -----------------------------------------------------
         App::setLocale($default);
         return $next($request);
     }

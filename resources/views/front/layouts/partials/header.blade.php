@@ -1,37 +1,56 @@
+{{--
+    Front header — main navigation, locale switcher, top-bar contact.
+
+    HARDENED v2:
+      • Menu links now use lroute() which derives locale from request,
+        not just app()->getLocale(). This is bulletproof against view
+        caching, response caching, and middleware-order edge cases.
+      • Language switcher uses locale_url_for() (canonical method).
+--}}
+
+@php
+    // Read the locale ONCE at the top of the partial so all blocks below
+    // are guaranteed consistent (rather than each block calling
+    // app()->getLocale() and possibly getting different answers if a
+    // helper mutates state mid-render).
+    $currentLocale = function_exists('_sn_current_locale')
+        ? _sn_current_locale()
+        : app()->getLocale();
+
+    $deUrl = function_exists('locale_url_for')
+        ? locale_url_for('de')
+        : url(request()->path() === '/' ? '/' : '/' . request()->path());
+    $enUrl = function_exists('locale_url_for')
+        ? locale_url_for('en')
+        : url(request()->path() === '/' ? '/' : '/' . request()->path()) . '?lang=en';
+
+    $phoneE164 = isset($setting) && $setting && !empty($setting->phone_e164)
+        ? $setting->phone_e164
+        : (isset($setting) ? $setting->phone_no : '+4915901228856');
+@endphp
+
 <header class="main-header">
     <div class="main-menu__top">
         <div class="main-menu__top-inner">
             <ul class="list-unstyled main-menu__contact-list">
                 <li>
-                    <div class="icon">
-                        <i class="icon-call-2"></i>
-                    </div>
+                    <div class="icon"><i class="icon-call-2"></i></div>
                     <div class="text">
-                        <p><a href="tel:{{ $setting->phone_no }}">{{ $setting->phone_no }}</a></p>
+                        <p><a href="tel:{{ $phoneE164 }}">{{ optional($setting ?? null)->phone_no ?? '+49 159 01228856' }}</a></p>
                     </div>
                 </li>
                 <li>
-                    <div class="icon">
-                        <i class="icon-envelope-2"></i>
-                    </div>
+                    <div class="icon"><i class="icon-envelope-2"></i></div>
                     <div class="text">
-                        <p><a href="mailto:{{ $setting->email }}">{{ $setting->email }}</a></p>
+                        <p><a href="mailto:{{ optional($setting ?? null)->email ?? 'info@step-now.de' }}">{{ optional($setting ?? null)->email ?? 'info@step-now.de' }}</a></p>
                     </div>
                 </li>
             </ul>
             <div class="main-menu__top-right">
 
-                {{-- Language switcher: clean direct-toggle URLs --}}
-                @php
-                    $currentLocale = app()->getLocale();
-                    $currentPath = request()->path() === '/' ? '/' : '/' . request()->path();
-                    $existingQuery = request()->query();
-                    unset($existingQuery['lang']);
-
-                    $deUrl = url($currentPath) . (!empty($existingQuery) ? '?' . http_build_query(array_merge($existingQuery, ['lang' => 'de'])) : '?lang=de');
-                    $enUrl = url($currentPath) . (!empty($existingQuery) ? '?' . http_build_query(array_merge($existingQuery, ['lang' => 'en'])) : '?lang=en');
-                @endphp
-                <div class="main-menu__lang-switcher" style="display:inline-flex; gap:6px; align-items:center; margin-right:18px; font-size:.85rem;">
+                {{-- Language switcher: uses locale_url_for() canonical method --}}
+                <div class="main-menu__lang-switcher"
+                     style="display:inline-flex; gap:6px; align-items:center; margin-right:18px; font-size:.85rem;">
                     <a href="{{ $deUrl }}"
                        style="color:{{ $currentLocale === 'de' ? '#ffc107' : '#fff' }}; text-decoration:{{ $currentLocale === 'de' ? 'underline' : 'none' }}; font-weight:{{ $currentLocale === 'de' ? '700' : '400' }};"
                        aria-label="Deutsch" title="Deutsch">DE</a>
@@ -42,22 +61,22 @@
                 </div>
 
                 <div class="main-menu__top-login-reg-box">
-                    <a href="{{ lroute('login') }}">{{ __('Sign in') }}</a>
+                    <a href="{{ function_exists('lroute') ? lroute('login') : route('login') }}">{{ __('Sign in') }}</a>
                 </div>
                 <div class="main-menu__social">
-                    @if (!empty($setting->fb_link))
+                    @if (!empty(optional($setting ?? null)->fb_link))
                         <a href="{{ $setting->fb_link }}" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>
                     @endif
-                    @if (!empty($setting->insta_link))
+                    @if (!empty(optional($setting ?? null)->insta_link))
                         <a href="{{ $setting->insta_link }}" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
                     @endif
-                    @if (!empty($setting->yt_link))
+                    @if (!empty(optional($setting ?? null)->yt_link))
                         <a href="{{ $setting->yt_link }}" target="_blank" rel="noopener"><i class="fab fa-youtube"></i></a>
                     @endif
-                    @if (!empty($setting->tiktok_link))
+                    @if (!empty(optional($setting ?? null)->tiktok_link))
                         <a href="{{ $setting->tiktok_link }}" target="_blank" rel="noopener"><i class="bi bi-tiktok"></i></a>
                     @endif
-                    @if (!empty($setting->linkedin_link))
+                    @if (!empty(optional($setting ?? null)->linkedin_link))
                         <a href="{{ $setting->linkedin_link }}" target="_blank" rel="noopener"><i class="fab fa-linkedin-in"></i></a>
                     @endif
                 </div>
@@ -65,14 +84,14 @@
         </div>
     </div>
 
-    {{-- MAIN NAVIGATION — uses lroute() so menu items keep ?lang=en --}}
+    {{-- MAIN NAVIGATION — every link uses lroute() so the menu keeps the locale --}}
     <nav class="main-menu">
         <div class="main-menu__wrapper">
             <div class="main-menu__wrapper-inner">
                 <div class="main-menu__left">
                     <div class="main-menu__logo">
                         <a href="{{ lroute('front.index') }}">
-                            <img src="{{ asset($setting->logo) }}" width="200px" alt="StepNow">
+                            <img src="{{ asset(optional($setting ?? null)->logo) }}" width="200px" alt="StepNow">
                         </a>
                     </div>
                 </div>
@@ -90,13 +109,11 @@
                 </div>
                 <div class="main-menu__right">
                     <div class="main-menu__call">
-                        <div class="main-menu__call-icon">
-                            <i class="icon-call-3"></i>
-                        </div>
+                        <div class="main-menu__call-icon"><i class="icon-call-3"></i></div>
                         <div class="main-menu__call-content">
                             <p class="main-menu__call-sub-title">{{ __('Call anytime') }}</p>
                             <h5 class="main-menu__call-number">
-                                <a href="tel:{{ $setting->phone_no }}">{{ $setting->phone_no }}</a>
+                                <a href="tel:{{ $phoneE164 }}">{{ optional($setting ?? null)->phone_no ?? '+49 159 01228856' }}</a>
                             </h5>
                         </div>
                     </div>
